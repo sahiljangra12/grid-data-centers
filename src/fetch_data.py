@@ -117,17 +117,24 @@ def load_balance(path: Path) -> pd.DataFrame:
         chunk = chunk[chunk["Balancing Authority"].str.strip().isin(C.BALANCING_AUTHORITIES)]
         if chunk.empty:
             continue
-        chunk = chunk[list(mapping)].rename(columns=mapping)
-        parts.append(chunk)
+        parts.append(chunk[list(mapping)])
     if not parts:
         raise ValueError(f"{path.name}: none of the expected balancing authorities found")
-    df = pd.concat(parts, ignore_index=True)
-    df["ba"] = df["ba"].str.strip()
-    df["utc"] = parse_time(df["utc"])
-    df["local"] = parse_time(df["local"])
-    for c in df.columns:
-        if c not in ("ba", "utc", "local"):
-            df[c] = to_number(df[c]).astype("float32")
+    raw = pd.concat(parts, ignore_index=True)
+    df = pd.DataFrame({
+        "ba": raw["Balancing Authority"].str.strip(),
+        "utc": parse_time(raw["UTC Time at End of Hour"]),
+        "local": parse_time(raw["Local Time at End of Hour"]),
+    })
+    # Two source columns can share a name once shortened (EIA has renamed fuel
+    # categories over time); those are added together.
+    targets: dict[str, list[str]] = {}
+    for src, name in mapping.items():
+        if name not in ("ba", "utc", "local"):
+            targets.setdefault(name, []).append(src)
+    for name, sources in targets.items():
+        vals = pd.concat([to_number(raw[src]) for src in sources], axis=1)
+        df[name] = vals.sum(axis=1, min_count=1).astype("float32")
     return df.dropna(subset=["utc"])
 
 
@@ -163,6 +170,8 @@ def main() -> int:
                     print(f"  not available: {kind} {year} {half}", flush=True)
                     continue
                 df = loader(path)
+                if kind == "BALANCE":
+                    log.setdefault("balance_headers", {})[path.name] = read_header(path)
                 bucket.append(df)
                 log["files"].append({"file": path.name, "rows_kept": int(len(df))})
                 print(f"  parsed {path.name}: {len(df):,} rows", flush=True)
