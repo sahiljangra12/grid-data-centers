@@ -1,0 +1,42 @@
+2021 PJM LOAD FORECAST REPORT
+EXECUTIVE SUMMARY
+• This report presents an independent load forecast prepared by PJM staff.
+• The report includes long-term forecasts of peak loads, net energy, load management,
+distributed solar generation, and plug-in electric vehicles for each PJM zone, region,
+locational deliverability area (LDA), and the total RTO.
+• Since the 2020 Load Report, PJM made significant revisions to the load forecast
+model. These enhancements are described in the supplemental report which is
+available with the other published materials. Intended as a reference, the supplement
+provides details of the processes used to develop the load forecast and the data and
+assumptions used. It describes the load forecast model that produces the base
+forecast as well as non-model adjustments to it.
+• The Non-Weather Sensitive model was estimated with historical data from January
+2011 through August 2020, while the Residential, Commercial, and Industrial sector
+models were estimated with data from 1998 through 2019. Weather scenarios were
+simulated with data from years 1993 through 2019, generating 351 scenarios.
+• The economic forecast used was Moody’s Analytics’ September 2020 release.
+• The 2020 update of Itron’s end-use data provides the basis for appliance saturation
+rates, efficiency, and intensity and is consistent with the Energy Information
+Administration's 2020 Annual Energy Outlook. PJM obtained additional
+information from certain zones on Residential saturation rates based on their own
+load research. Details on zones providing information are presented in the
+supplement.
+• The forecasts of the following zones have been adjusted to account for large,
+unanticipated load changes (see Table B-9 and the supplement for details):
+The forecast of the APS zone has been adjusted to account for accelerating load
+o
+related to natural gas processing plants;
+The forecast of the BGE zone has been adjusted to account for the on-going
+o
+implementation of a conservation voltage reduction program;
+The forecast of the COMED zone has been adjusted to account for the
+o
+implementation of a voltage optimization program;
+The forecast of the DOM zone has been adjusted to account for substantial on
+o
+going growth in data center construction.
+‐
+• Summer peak load growth for the PJM RTO is projected to average 0.3% per year
+over the next 10 years, and 0.2% over the next 15 years. The PJM RTO summer
+peak is forecasted to be 153,759 MW in 2031, a 10-year increase of 4,535 MW, and
+1

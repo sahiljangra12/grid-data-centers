@@ -1,0 +1,44 @@
+2023 PJM LOAD FORECAST REPORT
+EXECUTIVE SUMMARY
+• This report presents an independent load forecast prepared by PJM staff.
+• The report includes long-term forecasts of peak loads, net energy, load
+management, distributed solar generation, plug-in electric vehicles, and
+battery storage for each PJM zone, region, locational deliverability area
+(LDA), and the total RTO.
+• In 2022, PJM engaged with an outside consultant Itron to help with its
+transition to an hourly forecast model. Itron’s report was shared with the
+Load Analysis Subcommittee and can be found here
+(https://www.pjm.com/-/media/committees-
+groups/subcommittees/las/2022/20220912/pjm-model-review-final-
+report-from-itron.ashx).
+• Residential, Commercial, and Industrial sector models were estimated
+with data from 2012 through 2021. Weather scenarios were simulated
+with data from years 1993 through 2021, generating 377 scenarios.
+• The economic forecast used was Moody’s Analytics’ September 2022 release.
+• The 2022 update of Itron’s end-use data provides the basis for
+appliance saturation rates, efficiency, and intensity and is consistent
+with the Energy Information Administration's 2022 Annual Energy
+Outlook. PJM obtained additional information from certain zones on
+Residential saturation rates based on their own load research. Details
+on zones providing information are presented in the supplement.
+• The forecasts of the following zones have been adjusted to
+account for large, unanticipated load changes, market
+adjustments, and peak shaving adjusments(see Table B-9 and the
+supplement for details):
+The AEP forecast of the AEP zone has been adjusted to account to
+o
+account for growth in data center load;
+The APS forecast has been adjusted to account to account for
+o
+growth in data center load;
+The DOM forecast has been adjusted to account for growth in data
+o
+center load
+The EKPC forecast has been adjusted to account for a peak
+o
+shaving program to commence with the 2023 DY.
+The AEP, APS, and PL forecasts have been adjusted to account for
+o
+Non-Retail Behind-the-Meter Generation (NRBTMG)
+transitioning to participation as Demand Response in the
+1

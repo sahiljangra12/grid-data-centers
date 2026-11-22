@@ -1,0 +1,52 @@
+East Kentucky Power Cooperative (EKPC) provided saturation data on Heat
+o
+Pumps for Heating and Cooling, Electric Furnaces, Secondary Heating (Room
+Heating), Central A/C, Room Air Conditioners, and Water Heaters through 2013;
+Jersey Central Power & Light (JCPL) provided saturation data on all appliance
+o
+categories through 2016;
+Metropolitan Edison (METED) provided saturation data on all appliance
+o
+categories through 2016;
+Pennsylvania Electric (PENLC) provided saturation data on all appliance
+o
+categories through 2016;
+Dominion Virginia Power (DOM or VEPCO) provided saturation data on Heat
+o
+Pumps for Cooling, Central A/C and Room Air Conditioners through 2014.
+• The forecasts of the following zones have been adjusted to account for large,
+unanticipated load changes (see Table B-9 for details):
+The forecast of the APS zone has been adjusted to account for accelerating load
+o
+related to natural gas processing plants, adding 10-300 MW to the summer peak
+from 2019 through 2026 before declining to 220 MW in 2034;
+The forecast of the BGE zone has been adjusted to account for the on-going
+o
+implementation of a conservation voltage reduction program, which removes 40
+MW from the summer peak 2019, then 50 MW for the remainder of the forecast
+horizon;
+The forecast of the COMED zone has been adjusted to account for the
+o
+implementation of a voltage optimization program, which removes 40-300 MW
+from the summer peak beginning in 2019;
+The forecast of the DOM zone has been adjusted to account for substantial
+o
+on going growth in data center construction, which adds 100-1,070 MW to the
+summer peak from 2019 through 2026 before declining to 830 MW in 2034.
+‐
+• Summer peak load growth for the PJM RTO is projected to average 0.3% per year
+over the next 10 years, and 0.4% over the next 15 years. The PJM RTO summer
+peak is forecasted to be 156,689 MW in 2029, a 10-year increase of 5,331 MW, and
+reaches 159,700 MW in 2034, a 15-year increase of 8,342 MW. Annualized 10-year
+growth rates for individual zones range from -0.3% to 0.9%.
+• Winter peak load growth for PJM RTO is projected to average 0.4% per year over the
+next 10-year period, and 0.4% over the next 15-years. The PJM RTO winter peak
+load in 2028/29 is forecasted to be 136,178 MW, a 10-year increase of 5,096 MW,
+and reaches 138,438 MW in 2033/34, a 15-year increase of 7,356 MW. Annualized
+10-year growth rates for individual zones range from -0.3% to 1.1%.
+• Net energy for load growth for PJM RTO is projected to average 0.4% per year over
+the next 10-year period, and 0.4% over the next 15-years. Total PJM RTO energy is
+forecasted to be 836,489 GWh in 2029, a 10-year increase of 34,765 GWh, and
+reaches 851,403 GWh in 2034, a 15-year increase of 49,679 GWh. Annualized 10-
+year growth rates for individual zones range from -0.3% to 0.9%.
+2
