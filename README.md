@@ -73,6 +73,7 @@ pip install -r requirements.txt
 python -m pytest -q          # tests on synthetic data with known answers
 python src/fetch_data.py     # downloads about 1 GB from EIA, keeps two parquet files (not committed)
 python src/analysis.py       # writes docs/data/results.json
+python report/build_report.py  # figures + LaTeX report -> docs/report.pdf (needs pdflatex)
 python -m http.server -d docs 8000
 ```
 
@@ -82,6 +83,7 @@ python -m http.server -d docs 8000
 src/fetch_data.py    download and reduce the EIA-930 bulk files
 src/analysis.py      cleaning, models, results.json
 src/config.py        regions, dates, emission factors
+report/              LaTeX technical report: template, figures and the script that fills it from results.json
 tests/               synthetic grid with planted effects; checks the models recover them
 docs/                the website (eight pages, shared assets/site.css and assets/site.js) and its results file
 .github/workflows/   weekly refresh

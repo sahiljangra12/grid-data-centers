@@ -1,0 +1,344 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[sc]{mathpazo}
+\linespread{1.05}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[font=small,labelfont=bf,labelsep=period]{caption}
+\usepackage{xcolor}
+\definecolor{linkblue}{HTML}{1F4E9A}
+\usepackage[colorlinks=true,linkcolor=linkblue,citecolor=linkblue,urlcolor=linkblue]{hyperref}
+\hypersetup{pdftitle={Data center load on the U.S. grid},pdfauthor={Sahil}}
+\setlist{itemsep=2pt,topsep=4pt}
+\graphicspath{{figures/}}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Data center load on the U.S.\ grid: evidence from hourly demand in PJM zones, and its carbon cost at the margin\par}
+\vspace{1.1em}
+{\large Sahil\par}
+\vspace{0.3em}
+{\small Whiting School of Engineering, Johns Hopkins University, Baltimore, MD, USA\par}
+{\small\texttt{sfnu1@jh.edu}\par}
+\vspace{0.8em}
+{\small November 2026 \quad$\cdot$\quad Data through 2026-11-22, results generated 2026-11-22\par}
+\end{center}
+
+\vspace{0.6em}
+\begin{center}\textbf{Abstract}\end{center}
+\begin{quote}\small
+Has the build-out of data centers since 2023 left a measurable mark on U.S.\ electricity demand, and what does serving it emit? This report uses 2.1 million hourly records from EIA Form~930, covering 10 balancing authorities and 19 load zones of the PJM Interconnection, from 2019-01-01 to 2026-11-22. Two zones separate from the rest. In the AEP zone (Ohio and Appalachia), yearly demand growth moved from $-$0.8\% to +5.5\%. A synthetic control that tracked the zone within 0.96\% before 2023 is now 14.4\% below it, a gap of 2,163~MW that ranks 1 of 18 zones in placebo tests. The Dominion zone (Virginia) is 29.9\% above its control, but that divergence predates 2023; its speed-up beyond its earlier trend is 751~MW and is not statistically conclusive. Structural break tests date the change to July 2024 in AEP and August 2024 in Dominion. In PJM, one more MWh of demand adds 0.424~t of CO$_2$, 16\% more than the average MWh. Serving the load that is new since 2023 emits about 10.9~Mt of CO$_2$ a year. Demand is observed by zone, not by customer, so attribution to data centers is circumstantial.
+\end{quote}
+\noindent{\small\textbf{Keywords:} electricity demand; data centers; synthetic control; structural break; marginal emissions; PJM; EIA-930}
+
+\section{Introduction}
+
+Utilities and grid operators have reported sharp increases in requests to connect large data centers, and forecasts of U.S.\ electricity demand have been revised upward after more than a decade of flat load. Forecasts and interconnection queues describe intentions. This report asks what has already happened in metered demand, using only public data, and puts three questions to it:
+\begin{enumerate}[label=(\roman*)]
+\item Where, and by how much, has demand departed from its earlier path?
+\item When did the departure begin?
+\item What does the additional demand emit, given which plants respond to it?
+\end{enumerate}
+
+PJM is the natural place to look. It is the largest U.S.\ grid operator, it contains Northern Virginia, the largest data center market in the world, and it publishes hourly demand for each of its utility zones. Zones inside one market share weather systems, fuel prices and a regional economy, which makes them usable as comparisons for one another.
+
+\paragraph{Contributions.}
+\begin{enumerate}[label=(\roman*)]
+\item A zone-level comparison of demand growth before and after 2023 across all 19 usable PJM zones (Section~\ref{sec:zones}).
+\item Synthetic control estimates for the two zones that stand out, with placebo inference, leave-one-out refits and a placebo start date (Section~\ref{sec:scm}).
+\item Structural break dates for each zone's share of PJM demand (Section~\ref{sec:timing}).
+\item Marginal emission factors for ten grid regions, and the emissions implied by the additional load (Sections~\ref{sec:mef} and~\ref{sec:emissions}).
+\item A reproducible pipeline: every number, table and figure in this report is regenerated from the public data by one command (Section~\ref{sec:repro}).
+\end{enumerate}
+
+\section{Data}
+
+\subsection{Source}
+All data comes from the U.S.\ Energy Information Administration's Form EIA-930, the Hourly Electric Grid Monitor \cite{eia930}, downloaded as six-month bulk files. Two tables are used: the balance table (hourly demand, net generation and generation by energy source for each balancing authority) and the subregion table (hourly demand for zones within the larger authorities). The sample runs from 2019-01-01 to 2026-11-22. Ten balancing authorities are kept: PJM, ERCOT, MISO, SPP, NYISO, ISO-NE, CAISO, Southern Company, TVA and Duke Energy Carolinas. EIA's anomaly-adjusted columns are used where they exist.
+
+\subsection{Cleaning}
+The feed contains occasional reporting errors, including zeros and values several orders of magnitude too large. Hourly demand is cleaned in three steps. Values at or below zero are removed. Values more than 2.5 times, or less than 0.4 times, the median of the surrounding week (a centered 169-hour window) are removed. Gaps of up to six hours are filled by linear interpolation. A month is used only if at least 90\% of its hours are present. In PJM zones the filter removes well under 0.01\% of hours, except in the small Rockland zone, which is dropped for incomplete coverage. That leaves 19 zones.
+
+\subsection{Emissions}
+EIA-930 does not report emissions. Hourly CO$_2$ for each region is estimated as generation from coal, natural gas and petroleum multiplied by a fuel-specific factor taken from EIA's 2023 national totals of emissions and generation \cite{eiafaq}: 1.050~t/MWh for coal, 0.437 for gas and 1.109 for petroleum. All other sources are counted as zero. Section~\ref{sec:limits} discusses what this misses.
+
+\section{Methods}
+
+\subsection{Change in growth}\label{sec:m-growth}
+For each zone and region, let $y_t$ be monthly mean demand, or the monthly 5th-percentile hour as a measure of baseload. I estimate
+\begin{equation}
+\log y_t = \alpha_{m(t)} + \beta_1 \tau_t + \beta_2 \max(\tau_t, 0) + \varepsilon_t ,
+\label{eq:growth}
+\end{equation}
+where $\alpha_m$ are month-of-year effects and $\tau_t$ is time in years measured from January 2023. Yearly growth is $e^{\beta_1}-1$ before and $e^{\beta_1+\beta_2}-1$ after; the test of $\beta_2 = 0$ asks whether growth changed. Standard errors are Newey--West \cite{neweywest} with six lags. January 2023 is the first full month after the public release of ChatGPT and is fixed in advance for every unit.
+
+\subsection{Synthetic control}\label{sec:m-scm}
+For a zone of interest (unit 1), the outcome $y_{jt}$ is log monthly demand in zone $j$ measured against that zone's own 2019--22 mean, which removes level differences between zones \cite{doudchenko}. Weights over the $J$ comparison zones solve
+\begin{equation}
+\hat{w} = \arg\min_{w} \sum_{t < T_0} \Bigl( y_{1t} - \sum_{j=2}^{J+1} w_j\, y_{jt} \Bigr)^{2}
+\quad \text{subject to} \quad w_j \ge 0,\ \ \sum_j w_j = 1 ,
+\label{eq:scm}
+\end{equation}
+with $T_0$ = January 2023, and the estimated effect in month $t$ is $\hat{\delta}_t = y_{1t} - \sum_j \hat{w}_j y_{jt}$ \cite{adh2010,abadie2021}. Because the comparison zones experience the same weather systems, no temperature model is needed. I report the average of $\hat\delta_t$ over the latest 12 months, converted to megawatts.
+
+Two versions are estimated. The \emph{levels} version is Equation~\eqref{eq:scm} as written. The \emph{acceleration} version first removes each zone's own pre-2023 linear trend, extended forward, so the gap measures only growth beyond what the zone was already doing. The second is the appropriate estimand when a zone was diverging before the period of interest.
+
+Inference follows \cite{adh2010}. Each comparison zone is treated in turn as if it were the zone of interest, and the ratio of root mean squared prediction error (RMSPE) after 2023 to before is computed for all. The $p$-value is the rank of the true zone's ratio. With 17 comparison zones the smallest attainable $p$-value is 0.056. I also refit leaving out each comparison zone that carries weight, and run a placebo in time that uses only pre-2023 data and pretends the build-out began in January 2021.
+
+Dominion was designated as the zone of interest before any estimation. AEP was not: it emerged as the fastest-accelerating zone in the comparison of Section~\ref{sec:m-growth}, and is reported as a second zone of interest with that caveat. Each is excluded from the other's comparison pool.
+
+\subsection{Dating the change}
+Each zone's share of total PJM demand cancels weather that is common across zones. To date a change in its trend I regress the monthly share $s_t$ on month effects and a linear trend, add a term for a kink at month $k$,
+\begin{equation}
+s_t = \alpha_{m(t)} + \gamma_1 t + \gamma_2 \max(t-k, 0) + \eta_t ,
+\end{equation}
+and take the largest $F$ statistic for $\gamma_2 = 0$ over all $k$ in the middle 70\% of the sample \cite{andrews}. The $p$-value is from a moving-block bootstrap \cite{kunsch} of the residuals of the no-break model, with blocks of six months and 999 draws, which preserves serial correlation.
+
+\subsection{Marginal emissions}
+Following \cite{hawkes,silerevans}, the marginal emission factor is the slope $b$ in a regression of hourly changes,
+\begin{equation}
+\Delta \mathrm{CO}_{2,t} = a + b\, \Delta D_t + c_1 \Delta W_t + c_2 \Delta S_t + u_t ,
+\label{eq:mef}
+\end{equation}
+where $D$ is demand, $W$ wind output and $S$ solar output. Wind and solar do not respond to demand, but they ramp at the hours demand does; without the controls, a solar-rich region's morning ramp is mistaken for a clean response to load \cite{callaway}. Hours where either difference lies more than eight robust standard deviations from its median are dropped. Standard errors are heteroskedasticity- and autocorrelation-consistent with 24 lags. The model is estimated by region and year, and pooled with an interaction to test for a change after 2023. Replacing the dependent variable with the hourly change in each source's output gives the share of each source in the response to one more MWh.
+
+\section{Results}
+
+\subsection{Two zones accelerate}\label{sec:zones}
+Of 19 PJM zones, two stand apart (Figure~\ref{fig:zones}, Table~\ref{tab:zones}). In the AEP zone, growth went from $-$0.8\% a year in 2019--22 to +5.5\% a year since, a change of +6.3 points. Dominion went from +3.6\% to +7.2\%, a change of +3.6 points. The largest change in any other zone is +2.5 points. Most zones were shrinking slightly before 2023 and are growing slightly now, which is why a comparison group is needed: some of the turn is common to the whole grid.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{fig1_zones.pdf}
+\caption{Change in yearly demand growth, 2023 onward against 2019--22, by PJM zone.}\label{fig:zones}
+\end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Yearly demand growth by PJM zone, percent, and the change in percentage points. Baseload is the monthly 5th-percentile hour. $p$-values use Newey--West standard errors.}\label{tab:zones}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & \multicolumn{4}{c}{Mean demand} & Baseload & \\ \cmidrule(lr){2-5}\cmidrule(lr){6-6}
+Zone & 2019--22 & 2023 on & Change & $p$ & Change & Recent MW \\
+\midrule
+AEP (Ohio, Appalachia) & $-$0.84 & +5.50 & +6.34 & $<$0.001 & +6.59 & 17,213 \\
+Dominion (Virginia) & +3.61 & +7.20 & +3.59 & $<$0.001 & +3.34 & 16,530 \\
+Allegheny Power & $-$1.03 & +1.42 & +2.45 & $<$0.001 & +2.52 & 5,895 \\
+Dayton & $-$0.73 & +1.59 & +2.33 & $<$0.001 & +1.68 & 2,056 \\
+Delmarva & $-$1.54 & +0.68 & +2.22 & 0.042 & +1.85 & 2,138 \\
+ComEd (Chicago) & $-$1.02 & +1.04 & +2.06 & 0.002 & +2.34 & 10,987 \\
+Pepco (Washington) & $-$1.16 & +0.70 & +1.86 & 0.074 & +1.15 & 3,308 \\
+Duke Ohio and Kentucky & $-$0.85 & +0.98 & +1.83 & 0.006 & +0.61 & 3,048 \\
+PECO (Philadelphia) & $-$0.79 & +0.87 & +1.66 & 0.070 & +1.58 & 4,511 \\
+East Kentucky & +1.20 & +2.76 & +1.56 & 0.063 & +0.23 & 1,686 \\
+Baltimore Gas and Electric & $-$0.88 & +0.63 & +1.51 & 0.114 & +1.49 & 3,564 \\
+Jersey Central & $-$0.50 & +0.87 & +1.36 & 0.122 & +0.55 & 2,582 \\
+FirstEnergy Ohio & +0.08 & +1.33 & +1.25 & 0.053 & +0.91 & 7,852 \\
+PSEG (New Jersey) & $-$0.22 & +0.53 & +0.75 & 0.435 & +0.28 & 4,951 \\
+Atlantic City Electric & $-$1.06 & $-$0.45 & +0.61 & 0.475 & $-$0.68 & 1,155 \\
+Duquesne (Pittsburgh) & $-$0.24 & $-$0.22 & +0.01 & 0.983 & $-$0.95 & 1,483 \\
+Penelec & 0.00 & $-$0.05 & $-$0.05 & 0.943 & +0.09 & 1,946 \\
+Met-Ed & +0.15 & $-$0.13 & $-$0.28 & 0.713 & $-$1.72 & 1,788 \\
+PPL (Pennsylvania) & +1.51 & +0.37 & $-$1.14 & 0.477 & $-$1.32 & 4,832 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Synthetic control}\label{sec:scm}
+
+\paragraph{AEP.} The synthetic control reproduces AEP's pre-2023 demand with an RMSPE of 0.96\% (Figure~\ref{fig:aep}). Over November 2025 to October 2026, AEP is 14.4\% above it, or 2,163~MW on average (leave-one-out range 2,060 to 2,380). Its post/pre error ratio ranks 1 of 18 ($p$ = 0.056, the smallest attainable). The placebo start date gives a gap of +0.0\%, as it should if nothing was happening before 2023. Removing AEP's own earlier trend leaves the estimate essentially unchanged, because that trend was flat (Table~\ref{tab:scm}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig2_aep.pdf}
+\caption{AEP zone against its synthetic control. The dashed line marks January 2023. The grey band in (b) contains 90\% of placebo zones.}\label{fig:aep}
+\end{figure}
+
+\paragraph{Dominion.} Dominion is 29.9\% above its synthetic control (3,803~MW), but the fit before 2023 is poor at 4.2\%: no weighted average of other zones grew as fast as Dominion did even then (Figure~\ref{fig:dom}a). The placebo start date confirms it, with a gap of +10.3\% using pre-2023 data alone. The levels estimate therefore measures Dominion's long-running divergence, not an effect dated to 2023. The acceleration version fits well before 2023 (1.25\%) and finds a gap of 4.8\%, or 751~MW, ranking 2 of 18 ($p$ = 0.111). That is suggestive of a speed-up but does not meet a conventional threshold.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig3_dominion.pdf}
+\caption{Dominion zone: gap to its synthetic control under the two specifications.}\label{fig:dom}
+\end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Synthetic control estimates. The gap is the average over the latest 12 months. Ratio is post-2023 over pre-2023 RMSPE; rank and $p$ are from placebo zones. The placebo start date uses pre-2023 data only.}\label{tab:scm}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Specification & Gap (\%) & MW & Leave-one-out MW & Pre-RMSPE (\%) & Ratio & Rank & $p$ \\
+\midrule
+AEP, levels & +14.4 & 2,163 & 2,060--2,380 & 0.96 & 8.3 & 1/18 & 0.056 \\
+AEP, acceleration & +14.5 & 2,185 & 2,080--2,325 & 0.96 & 8.4 & 1/18 & 0.056 \\
+AEP, placebo start 2021-01 & +0.0 &  &  &  &  & 8/18 & 0.444 \\
+Dominion, levels & +29.9 & 3,803 & 3,753--4,110 & 4.20 & 4.4 & 1/18 & 0.056 \\
+Dominion, acceleration & +4.8 & 751 & 642--1,089 & 1.25 & 2.9 & 2/18 & 0.111 \\
+Dominion, placebo start 2021-01 & +10.3 &  &  &  &  & 1/18 & 0.056 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering\small
+\caption{Composition of each synthetic control.}\label{tab:weights}
+\begin{tabular}{lp{0.68\linewidth}}
+\toprule
+Specification & Comparison zones and weights \\
+\midrule
+AEP, levels & FirstEnergy Ohio 36\%, Allegheny Power 24\%, Penelec 16\%, East Kentucky 13\%, Duke Ohio and Kentucky 11\% \\
+Dominion, levels & PSEG 49\%, PPL 26\%, East Kentucky 24\% \\
+Dominion, acceleration & Pepco 26\%, Duke Ohio and Kentucky 22\%, Allegheny Power 18\%, Baltimore Gas and Electric 15\%, Duquesne 12\%, East Kentucky 5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Timing}\label{sec:timing}
+Dominion's share of PJM demand rose from 13.0\% to 17.0\%, and AEP's from 16.4\% to 17.7\% (Figure~\ref{fig:share}). The break test dates the change in slope to July 2024 for AEP ($p=0.001$) and August 2024 for Dominion ($p=0.004$); see Table~\ref{tab:break}. Neither date was imposed. Both fall well after January 2023, which is what a construction-led increase would produce, since large facilities take a year or more to build and energize. It also means the January 2023 cut-off used elsewhere is conservative: it places some pre-surge months in the ``after'' period.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{fig4_share.pdf}
+\caption{Share of PJM demand. Thin lines are monthly values, thick lines 12-month averages. Open circles mark estimated break dates.}\label{fig:share}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\caption{Structural break tests on each zone's share of PJM demand (percent). Slopes are percentage points per year. $p$-values from 999 moving-block bootstrap draws.}\label{tab:break}
+\begin{tabular}{lrrlrrrr}
+\toprule
+Zone & Share 2019 & Latest & Break & Slope before & Slope after & Sup-$F$ & $p$ \\
+\midrule
+AEP & 16.40 & 17.70 & July 2024 & $-$0.04 & +0.86 & 348.2 & 0.001 \\
+Dominion & 12.96 & 16.97 & August 2024 & +0.52 & +0.83 & 31.6 & 0.004 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Other regions}
+Applying Equation~\eqref{eq:growth} to baseload in ten regions, growth increased significantly at the 5\% level in 2 of 10 (Figure~\ref{fig:regions}, Table~\ref{tab:regions}). The evidence is regional, not national. ERCOT has the fastest baseload growth of any region in both periods, so its increase is hard to separate from its own trend. These regional estimates have no comparison group and should be read as descriptive.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{fig5_regions.pdf}
+\caption{Baseload growth before and after 2023 by grid region. Filled markers indicate a change significant at the 5\% level.}\label{fig:regions}
+\end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Baseload growth by grid region, percent per year.}\label{tab:regions}
+\begin{tabular}{lrrrrrr}
+\toprule
+Region & 2019--22 & 95\% CI & 2023 on & 95\% CI & Change & $p$ \\
+\midrule
+SPP (Central) & +1.15 & [+0.4, +1.9] & +3.96 & [+3.0, +4.9] & +2.81 & $<$0.001 \\
+PJM (Mid-Atlantic) & +0.52 & [$-$0.1, +1.1] & +2.92 & [+2.4, +3.4] & +2.40 & $<$0.001 \\
+ERCOT (Texas) & +4.66 & [+3.6, +5.8] & +6.43 & [+5.5, +7.4] & +1.77 & 0.054 \\
+MISO (Midwest) & +0.18 & [$-$0.5, +0.9] & +1.54 & [+0.7, +2.4] & +1.36 & 0.059 \\
+Tennessee Valley Authority & +0.78 & [$-$0.1, +1.7] & +1.86 & [+0.8, +2.9] & +1.08 & 0.242 \\
+NYISO (New York) & $-$0.12 & [$-$0.7, +0.5] & +0.60 & [$-$0.2, +1.4] & +0.72 & 0.248 \\
+Southern Company & +0.25 & [$-$0.8, +1.3] & +0.69 & [$-$0.4, +1.8] & +0.44 & 0.667 \\
+ISO-NE (New England) & $-$0.70 & [$-$1.4, +0.0] & $-$0.34 & [$-$1.4, +0.8] & +0.36 & 0.661 \\
+Duke Energy Carolinas & +0.86 & [$-$0.2, +1.9] & +1.14 & [+0.5, +1.8] & +0.28 & 0.703 \\
+CAISO (California) & +1.18 & [+0.5, +1.8] & +1.35 & [+0.7, +2.0] & +0.16 & 0.792 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Marginal emissions}\label{sec:mef}
+In PJM the marginal emission factor since 2023 is 0.424~t/MWh (95\% interval 0.420 to 0.428), down from 0.481 in 2019--22 ($p<0.001$ for the change). Average intensity in the latest full year is 0.365 (Figure~\ref{fig:mef}a). The marginal MWh carries 16\% more CO$_2$ than the average one because nuclear, which supplies about a third of PJM's energy, does not respond to demand. Since 2023, gas provides 52\% of the response to an extra MWh, coal 16\%, hydro and pumped storage 15\%, and imports 12\% (Figure~\ref{fig:mef}b). Table~\ref{tab:mef} gives the factors for all ten regions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig6_emissions.pdf}
+\caption{PJM: (a) marginal and average emission factors by year, with 95\% intervals; the latest year is to date. (b) Share of each source in the response to one more MWh of demand.}\label{fig:mef}
+\end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Marginal emission factors, t CO$_2$ per MWh, and average intensity in the latest full year.}\label{tab:mef}
+\begin{tabular}{lrrrrr}
+\toprule
+Region & Marginal 2019--22 & Marginal 2023 on & 95\% CI & $p$ (change) & Average \\
+\midrule
+PJM (Mid-Atlantic) & 0.481 & 0.424 & [0.420, 0.428] & $<$0.001 & 0.365 \\
+ERCOT (Texas) & 0.552 & 0.451 & [0.444, 0.458] & $<$0.001 & 0.316 \\
+MISO (Midwest) & 0.679 & 0.628 & [0.623, 0.633] & $<$0.001 & 0.461 \\
+SPP (Central) & 0.596 & 0.575 & [0.569, 0.581] & $<$0.001 & 0.415 \\
+NYISO (New York) & 0.330 & 0.323 & [0.319, 0.326] & 0.006 & 0.233 \\
+ISO-NE (New England) & 0.358 & 0.303 & [0.298, 0.307] & $<$0.001 & 0.260 \\
+CAISO (California) & 0.235 & 0.149 & [0.143, 0.156] & $<$0.001 & 0.188 \\
+Southern Company & 0.506 & 0.507 & [0.502, 0.513] & 0.639 & 0.398 \\
+Tennessee Valley Authority & 0.287 & 0.222 & [0.216, 0.227] & $<$0.001 & 0.329 \\
+Duke Energy Carolinas & 0.411 & 0.391 & [0.385, 0.398] & $<$0.001 & 0.301 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Emissions from the additional load}\label{sec:emissions}
+Summing the acceleration estimates for the two zones gives 2,936~MW of demand that is new since 2023, or 25.7~TWh a year. At PJM's marginal factor that is 10.9~Mt of CO$_2$ a year, with a range of 10.0 to 12.8 from the leave-one-out refits and the interval on the marginal factor. Using the average factor would give 9.4~Mt. If all of Dominion's divergence from comparison zones is counted, including the part that predates 2023, the load is 5,966~MW and the emissions 22.2~Mt a year (Table~\ref{tab:emissions}).
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Emissions implied by the additional load, at PJM's marginal emission factor.}\label{tab:emissions}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Reading & AEP MW & Dominion MW & Total MW & TWh/yr & Mt CO$_2$/yr & Range & At average \\
+\midrule
+New since 2023 (acceleration) & 2,185 & 751 & 2,936 & 25.7 & 10.9 & 10.0--12.8 & 9.4 \\
+All divergence (levels) & 2,163 & 3,803 & 5,966 & 52.3 & 22.2 & 21.4--24.3 & 19.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{Robustness}
+\begin{itemize}
+\item \textbf{Comparison pool.} Leave-one-out refits move the AEP estimate between 2,060 and 2,380~MW. No single comparison zone drives it.
+\item \textbf{Pre-existing trends.} The placebo start date separates the two zones cleanly: +0.0\% for AEP and +10.3\% for Dominion. This is why Dominion's headline number uses the acceleration version.
+\item \textbf{Contamination between zones.} Each zone of interest is removed from the other's comparison pool. Other zones may also host data centers, which would bias the estimates toward zero.
+\item \textbf{Load shape.} Load factor (mean over peak demand) has risen in both zones and fallen in the rest of PJM, consistent with added round-the-clock load. Baseload shows the same acceleration as mean demand (Table~\ref{tab:zones}).
+\item \textbf{Estimator checks.} On a synthetic grid with a planted 10\% a year effect and a planted marginal factor, the code recovers both within tolerance and finds nothing in zones with no planted effect. These tests run before every weekly refresh.
+\end{itemize}
+
+\section{Limitations}\label{sec:limits}
+\begin{itemize}
+\item \textbf{Attribution.} EIA-930 reports demand by zone. Factories, electrification and population growth also add load. The case for data centers rests on location, timing, the flatness of the added load and public reporting, not on direct observation.
+\item \textbf{Selection of AEP.} AEP was identified from the data. Its $p$-value does not account for having searched across zones for the largest change.
+\item \textbf{Coarse inference.} Placebo $p$-values cannot fall below 0.056 with this many zones.
+\item \textbf{Emission factors.} One national factor per fuel ignores differences in plant efficiency. Marginal gas units are often less efficient than the fleet average, so the marginal factor here is more likely too low than too high.
+\item \textbf{Regional boundary.} Emissions are counted within each balancing authority. Imports, about 12\% of PJM's marginal response, are not traced to their source.
+\item \textbf{Short-run margin.} The marginal factor describes which existing plants respond hour to hour. It does not capture new plants built, or retirements delayed, because of sustained load growth.
+\item \textbf{Behind-the-meter supply.} Data centers with on-site generation do not appear in zonal demand.
+\end{itemize}
+
+\section{Reproducibility}\label{sec:repro}
+The pipeline is a downloader, the analysis, a test suite and the script that builds this report. It needs no API key and runs in about two minutes on a standard GitHub Actions runner, which re-executes it every Monday. Random seeds are fixed. This report is regenerated by \texttt{report/build\_report.py} from the same results file the website reads, so the two cannot disagree. Code: \url{https://github.com/sahiljangra12/grid-data-centers}. Website: \url{https://sahiljangra12.github.io/grid-data-centers/}.
+
+\begin{thebibliography}{99}\small
+\bibitem{adh2010} Abadie, A., Diamond, A., and Hainmueller, J. (2010). Synthetic control methods for comparative case studies: Estimating the effect of California's tobacco control program. \emph{Journal of the American Statistical Association}, 105(490).
+\bibitem{abadie2021} Abadie, A. (2021). Using synthetic controls: Feasibility, data requirements, and methodological aspects. \emph{Journal of Economic Literature}, 59(2).
+\bibitem{andrews} Andrews, D.~W.~K. (1993). Tests for parameter instability and structural change with unknown change point. \emph{Econometrica}, 61(4).
+\bibitem{callaway} Callaway, D.~S., Fowlie, M., and McCormick, G. (2018). Location, location, location: The variable value of renewable energy and demand-side efficiency resources. \emph{Journal of the Association of Environmental and Resource Economists}, 5(1).
+\bibitem{doudchenko} Doudchenko, N., and Imbens, G.~W. (2016). Balancing, regression, difference-in-differences and synthetic control methods: A synthesis. NBER Working Paper 22791.
+\bibitem{hawkes} Hawkes, A.~D. (2010). Estimating marginal CO$_2$ emissions rates for national electricity systems. \emph{Energy Policy}, 38(10).
+\bibitem{kunsch} K\"unsch, H.~R. (1989). The jackknife and the bootstrap for general stationary observations. \emph{Annals of Statistics}, 17(3).
+\bibitem{neweywest} Newey, W.~K., and West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \emph{Econometrica}, 55(3).
+\bibitem{silerevans} Siler-Evans, K., Azevedo, I.~L., and Morgan, M.~G. (2012). Marginal emissions factors for the U.S.\ electricity system. \emph{Environmental Science \& Technology}, 46(9).
+\bibitem{eia930} U.S.\ Energy Information Administration. Form EIA-930, Hourly Electric Grid Monitor. \url{https://www.eia.gov/electricity/gridmonitor/}.
+\bibitem{eiafaq} U.S.\ Energy Information Administration. How much carbon dioxide is produced per kilowatthour of U.S.\ electricity generation? \url{https://www.eia.gov/tools/faqs/faq.php?id=74}.
+\end{thebibliography}
+
+\end{document}
