@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carbon | Grid / Data Centers</title>
+<meta name="description" content="Marginal and average emission factors by grid region, and the emissions implied by new load.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / What the extra demand emits</p><h1>What the extra demand emits</h1><p>New load is not served by the grid&rsquo;s average mix. It is served by whichever plants turn up when demand rises.</p></header><section class="block" id="carbon">
+  <div class="split">
+    <div class="text">
+      <h2>The next megawatt-hour is dirtier than the average one</h2>
+      <p class="takeaway" id="t-mef"></p>
+      <p>Nuclear plants run flat out regardless of demand. When demand rises, the plants that respond are mostly gas and coal. The marginal emission factor captures this: it is the slope of hourly changes in CO&#8322; on hourly changes in demand, holding wind and solar output fixed.</p>
+      <p>Carbon accounts that multiply new load by the grid&rsquo;s average intensity miss that difference.</p>
+    </div>
+    <div>
+      <div class="controls" id="mef-region" role="group" aria-label="Grid region"></div>
+      <p class="chart-title" id="mef-title"></p>
+      <p class="chart-sub">Tonnes of CO&#8322; per MWh. Whiskers are 95% confidence intervals.</p>
+      <div class="chart" id="c-mef"></div>
+      <div class="legend-row"><span><i style="background:var(--hot)"></i>Marginal: one extra MWh of demand</span><span><i style="background:var(--cool)"></i>Average: all generation</span></div>
+      <p class="chart-title" style="margin-top:44px">What answers one extra MWh of demand in PJM</p>
+      <p class="chart-sub">Share of the response since 2023.</p>
+      <div class="chart" id="c-mix"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <h2>What the extra load emits</h2>
+  <p class="takeaway" style="margin-bottom:34px" id="t-calc"></p>
+  <div class="calc" id="calc"></div>
+  <p class="fine" style="margin-top:22px" id="t-calc-fine"></p>
+</section>
+
+<section class="block detail"><h2><span data-region-name>PJM</span> in detail</h2>
+<p>Pick a region with the buttons above. The tables and charts below follow.</p>
+<p class="tablecap">Marginal and average factors by year</p><div class="tablewrap"><table class="plain" id="tbl-mef-year"></table></div><div class="two"><div><p class="chart-title">Generation mix by year</p><p class="chart-sub">Share of net generation.</p><div class="chart" id="c-genmix"></div><div class="legend-row" id="genmix-legend"></div></div><div><p class="chart-title">What answers extra demand</p><p class="chart-sub">Share of the response to one more MWh, before and after 2023. Negative shares are drawn as zero.</p><div class="chart" id="c-mix-compare"></div><div class="legend-row" id="mixc-legend"></div></div></div><p class="tablecap">Response to one extra MWh of demand</p><p class="chart-sub">From hourly regressions holding wind and solar fixed. Imports are what the region&rsquo;s own plants do not cover; a negative value means the region&rsquo;s plants over-respond and exports rise.</p><div class="tablewrap"><table class="plain" id="tbl-mix"></table></div><p class="tablecap">All regions</p><p class="chart-sub">Marginal factors in tonnes of CO&#8322; per MWh. The p-value tests whether the factor changed after 2023.</p><div class="tablewrap"><table class="plain" id="tbl-mef"></table></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

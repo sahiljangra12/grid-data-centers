@@ -6,6 +6,16 @@ A statistical study of every hour of public grid data from January 2019 to today
 
 **Website:** https://sahiljangra12.github.io/grid-data-centers/
 
+Pages: [overview](https://sahiljangra12.github.io/grid-data-centers/) ·
+[zones](https://sahiljangra12.github.io/grid-data-centers/zones.html) ·
+[twin test](https://sahiljangra12.github.io/grid-data-centers/twin.html) ·
+[timing](https://sahiljangra12.github.io/grid-data-centers/timing.html) ·
+[regions](https://sahiljangra12.github.io/grid-data-centers/regions.html) ·
+[carbon](https://sahiljangra12.github.io/grid-data-centers/carbon.html) ·
+[live grid](https://sahiljangra12.github.io/grid-data-centers/live.html) ·
+[technical report](https://sahiljangra12.github.io/grid-data-centers/report.html)
+([PDF](https://sahiljangra12.github.io/grid-data-centers/report.pdf))
+
 ## What it finds
 
 The numbers below are from the run of 22 November 2026. The pipeline reruns every Monday, and the
@@ -73,7 +83,7 @@ src/fetch_data.py    download and reduce the EIA-930 bulk files
 src/analysis.py      cleaning, models, results.json
 src/config.py        regions, dates, emission factors
 tests/               synthetic grid with planted effects; checks the models recover them
-docs/                the website (GitHub Pages) and its results file
+docs/                the website (eight pages, shared assets/site.css and assets/site.js) and its results file
 .github/workflows/   weekly refresh
 ```
 

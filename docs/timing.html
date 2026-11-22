@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timing | Grid / Data Centers</title>
+<meta name="description" content="When each zone's share of PJM demand changed slope.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / When the growth began</p><h1>When the growth began</h1><p>Dating the change matters. A break that lines up with a known event is evidence about cause; one that does not is a warning.</p></header><section class="block">
+  <div class="split">
+    <div class="text">
+      <h2>When the bend came</h2>
+      <p class="takeaway" id="t-share"></p>
+      <p>Each zone&rsquo;s share of total PJM demand cancels out most weather, because a heat wave lifts every zone at once. A sup-F test searches every possible month for a change in the trend&rsquo;s slope; a block bootstrap gives the p-value.</p>
+      <p id="t-break"></p>
+    </div>
+    <div>
+      <p class="chart-title">Share of PJM electricity demand</p>
+      <p class="chart-sub">Percent, 12-month rolling average. Markers show each zone&rsquo;s estimated break.</p>
+      <div class="chart" id="c-share"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block detail"><h2>The raw monthly shares</h2>
+<p>The rolling average above hides the seasonal swing. Here are the monthly values the break test is run on. Dominion&rsquo;s share is highest in summer and winter, when its heating and cooling load peaks.</p>
+<div><p class="chart-title">Share of PJM demand, monthly</p><p class="chart-sub">Percent, not smoothed.</p><div class="chart" id="c-share-raw"></div></div><p class="tablecap">Break test results</p><p class="chart-sub">Slopes are in percentage points of PJM share per year. The sup-F statistic is the largest F across all candidate break months; its p-value comes from 999 block-bootstrap draws.</p><div class="tablewrap"><table class="plain" id="tbl-break"></table></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twin test | Grid / Data Centers</title>
+<meta name="description" content="Synthetic control estimates for the Dominion and AEP zones with placebo tests.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / Each zone against its twin</p><h1>Each zone against its twin</h1><p>A synthetic control answers a counterfactual question: what would demand in this zone look like if it had kept moving with its neighbors?</p></header><section class="block">
+  <div class="split">
+    <div class="text">
+      <h2>Measured against a statistical twin</h2>
+      <p class="takeaway" id="t-scm"></p>
+      <p>A synthetic control builds a stand-in for each zone: a weighted mix of other PJM zones, with weights chosen so the mix reproduces the zone&rsquo;s demand before 2023. The same weather systems and economy move all of them, so what is left after 2023 is what is particular to the zone.</p>
+      <p>To judge whether a gap is unusual, the same procedure is run on every other zone as if it were the one under study. The grey band shows where 90% of those placebo gaps fall.</p>
+      <p class="fine" id="t-scm-fine"></p>
+    </div>
+    <div>
+      <div class="controls" id="scm-zone" role="group" aria-label="Zone"></div>
+      <div class="controls" id="scm-kind" role="group" aria-label="Comparison"></div>
+      <p class="chart-title" id="scm-title"></p>
+      <p class="chart-sub" id="scm-sub"></p>
+      <div class="chart" id="c-scm"></div>
+      <div class="legend-row"><span><i style="background:var(--hot)"></i>Gap: actual minus synthetic</span><span><i class="sq" style="background:var(--band)"></i>Where 90% of placebo zones fall</span></div>
+      <div class="stats" id="scm-stats"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block detail"><h2>The two paths</h2>
+<p>The gap chart above is the difference between these two lines. Both are indexed so the 2019&ndash;22 average equals 100, and smoothed over 12 months. The buttons above switch zone and comparison.</p>
+<div><p class="chart-title">Actual and synthetic demand</p><p class="chart-sub">Index, 2019&ndash;22 average = 100, 12-month rolling average.</p><div class="chart" id="c-twin-lines"></div></div></section>
+<section class="block detail"><h2>Could it be chance?</h2>
+<p>Run the same method on a zone where nothing special happened and it will still show some gap after 2023. The test statistic is the size of a zone&rsquo;s error after 2023 relative to its error before. With <span data-v="d.n_donors|0"></span> comparison zones, a zone that has the largest ratio of all gets a p-value of <span data-v="d.min_p|3"></span>, which is the smallest this design can produce.</p>
+<div><p class="chart-title">Post-2023 error relative to pre-2023 error</p><p class="chart-sub">Each PJM zone treated in turn as if it were the one under study.</p><div class="chart" id="c-placebo"></div></div><p class="tablecap">Weights in the synthetic twin</p><p class="chart-sub">For the zone and comparison selected above. Weights are non-negative and sum to one.</p><div class="tablewrap"><table class="plain" id="tbl-weights"></table></div><p class="tablecap">All specifications</p><p class="chart-sub">Leave-one-out drops each comparison zone with real weight and refits. The placebo start date uses only pre-2023 data and pretends the build-out began two years early; a gap there means the zone was already diverging.</p><div class="tablewrap"><table class="plain" id="tbl-robust"></table></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

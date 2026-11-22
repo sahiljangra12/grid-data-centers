@@ -302,6 +302,8 @@ def synthetic_control(monthly_mean: pd.DataFrame, treated: str, detrend: bool = 
         "rmspe_pre_pct": r(100 * main["rmspe_pre"], 2),
         "rmspe_ratio": r(main["ratio"], 2),
         "placebo_p_value": r(p_value, 3),
+        "placebo_ratios": {d: r(v, 2) for d, v in sorted(placebo_ratio.items(), key=lambda kv: -kv[1])},
+        "rmspe_post_pct": r(100 * main["rmspe_post"], 2),
         "rank": f"{1 + int(np.sum(ratios >= main['ratio']))} of {len(ratios) + 1}",
         "recent_gap_pct": r(100 * (np.exp(gap_recent) - 1), 2),
         "recent_gap_mw": r(to_mw(gap_recent), 0),

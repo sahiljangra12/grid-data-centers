@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zones | Grid / Data Centers</title>
+<meta name="description" content="Demand growth before and after 2023 for every PJM zone.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / Which zones sped up</p><h1>Which zones sped up</h1><p>PJM reports hourly demand for each utility zone. This page compares how fast each one was growing before 2023 with how fast it has grown since.</p></header><section class="block" id="findings">
+  <div class="split">
+    <div class="text">
+      <h2>Two zones pulled away</h2>
+      <p class="takeaway" id="t-zones"></p>
+      <p>PJM, the grid that runs from Chicago to Virginia, reports hourly demand for each of its utility zones. For every zone, a regression compares yearly growth before 2023 with growth since, after removing the seasonal cycle.</p>
+      <p>Dominion&rsquo;s zone covers Northern Virginia, the world&rsquo;s largest data center market, and was chosen in advance. The AEP zone, which includes central Ohio, was not: it surfaced from this comparison. <a href="https://www.renewableenergyworld.com/td/data-centers-are-flocking-to-ohio-here-comes-the-transmission-to-support-them/">Trade reporting</a> identifies Ohio as the newer data center hub on PJM&rsquo;s system.</p>
+      <p class="fine">Demand data cannot see what is behind a meter. The pattern fits data centers in timing, place and shape, but this study does not observe them directly.</p>
+    </div>
+    <div>
+      <p class="chart-title">Change in yearly demand growth, 2023 onward vs. 2019&ndash;2022</p>
+      <p class="chart-sub">Percentage points, each PJM zone. Hover for the rates behind each bar.</p>
+      <div class="chart" id="c-zones"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block detail"><h2>The same story as index lines</h2>
+<p>Each line is a 12-month rolling average, scaled so 2019 equals 100. Rolling over a full year removes the seasonal cycle. Baseload is the 5th-percentile hour of each month, the demand that is still there at 4 a.m. in mild weather.</p>
+<div class="two"><div><p class="chart-title">Average demand, 2019 = 100</p><p class="chart-sub">12-month rolling average.</p><div class="chart" id="c-zone-index"></div></div><div><p class="chart-title">Baseload demand, 2019 = 100</p><p class="chart-sub">12-month rolling average of each month&rsquo;s 5th-percentile hour.</p><div class="chart" id="c-zone-base"></div></div></div></section>
+<section class="block detail"><h2>Flatter load, hour to hour</h2>
+<p>Load factor is average demand divided by peak demand. Homes and offices swing between day and night; a data center draws nearly the same power around the clock. A zone filling with round-the-clock load should see its load factor rise, and both hot zones do while the rest of PJM does not.</p>
+<div><p class="chart-title">Load factor by year</p><p class="chart-sub">Average demand as a percent of the 99.9th-percentile hour. Full calendar years only.</p><div class="chart" id="c-loadfactor"></div></div></section>
+<section class="block detail"><h2>Every zone, in full</h2>
+<p>Growth rates come from a regression of log monthly demand on month-of-year effects and a trend that is allowed to bend in January 2023. The p-value tests whether the bend is zero, using Newey-West standard errors.</p>
+<p class="tablecap">Average demand</p><div class="tablewrap"><table class="plain" id="tbl-zones"></table></div><p class="tablecap">Baseload demand</p><div class="tablewrap"><table class="plain" id="tbl-zones-base"></table></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live grid | Grid / Data Centers</title>
+<meta name="description" content="The most recent week of hourly generation, demand and carbon intensity on PJM.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / The grid this week</p><h1>The grid this week</h1><p>The latest seven days of PJM data in the most recent weekly run of the pipeline.</p></header><section class="block" id="live">
+  <div class="split">
+    <div class="text">
+      <h2>The last seven days on PJM</h2>
+      <p class="takeaway" id="t-live"></p>
+      <p>The pipeline behind this page runs every Monday on GitHub Actions: it downloads EIA&rsquo;s latest files, reruns every model and republishes the numbers. Nothing on this page is typed in by hand.</p>
+    </div>
+    <div>
+      <p class="chart-title">PJM generation by source, hourly</p>
+      <p class="chart-sub" id="live-sub"></p>
+      <div class="chart" id="c-live"></div>
+      <div class="legend-row" id="live-legend"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block detail"><h2>Demand and carbon, hour by hour</h2>
+<p>Carbon intensity rises and falls with demand: when load climbs, gas and coal plants ramp up while nuclear output stays flat, so the mix gets dirtier at the same time as it gets bigger.</p>
+<div class="two"><div><p class="chart-title">PJM demand</p><p class="chart-sub">Hourly, Eastern time.</p><div class="chart" id="c-demand"></div></div><div><p class="chart-title">PJM carbon intensity</p><p class="chart-sub">Tonnes of CO&#8322; per MWh generated, hourly.</p><div class="chart" id="c-intensity"></div></div></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>

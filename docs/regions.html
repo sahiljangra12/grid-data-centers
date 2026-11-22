@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regions | Grid / Data Centers</title>
+<meta name="description" content="Baseload growth before and after 2023 across ten U.S. grid regions.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / Region by region</p><h1>Region by region</h1><p>Is this a national story or a local one? Ten large grid regions, the same test for each.</p></header><section class="block">
+  <div class="split">
+    <div class="text">
+      <h2>Not every grid is feeling it</h2>
+      <p class="takeaway" id="t-regions"></p>
+      <p>Baseload here is the 5th-percentile hour of each month: the demand that is there at 4 a.m. in mild weather. Round-the-clock loads such as data centers raise it directly, and weather moves it less than it moves peaks.</p>
+      <p class="fine">Filled markers are changes that are statistically significant at the 5% level, using Newey-West standard errors. Other things also raise baseload, including new factories, crypto mining and electrification.</p>
+    </div>
+    <div>
+      <p class="chart-title">Baseload growth per year, before and after 2023</p>
+      <p class="chart-sub">Percent per year, ten U.S. grid regions.</p>
+      <div class="chart" id="c-regions"></div>
+      <div class="legend-row"><span><i class="sq" style="background:var(--cool);border-radius:50%"></i>2019&ndash;2022</span><span><i class="sq" style="background:var(--hot);border-radius:50%"></i>2023 onward</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="block detail"><h2>Baseload since 2019</h2>
+<p>Coloured lines are the regions whose growth changed significantly. Grey lines are the rest. ERCOT stands out for a different reason: it was already growing fast before 2023, so its speed-up is harder to distinguish from its own trend.</p>
+<div><p class="chart-title">Baseload demand, 2019 = 100</p><p class="chart-sub">12-month rolling average of each month&rsquo;s 5th-percentile hour.</p><div class="chart" id="c-region-index"></div></div><p class="tablecap">Baseload growth</p><div class="tablewrap"><table class="plain" id="tbl-regions-base"></table></div><p class="tablecap">Average demand growth</p><div class="tablewrap"><table class="plain" id="tbl-regions-mean"></table></div></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=2"></script>
+</body>
+</html>
