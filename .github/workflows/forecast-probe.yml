@@ -1,0 +1,23 @@
+name: Forecast study probe
+on:
+  push:
+    branches: [forecast-study]
+    paths: ["forecast/probe.py", ".github/workflows/forecast-probe.yml"]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install requests openpyxl pdfplumber
+      - run: python forecast/probe.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add forecast/probe_log.json forecast/extract forecast/raw/*.xlsx || true
+          git commit -m "Probe results" || echo none
+          git push
