@@ -100,14 +100,15 @@ def load_balance(path: Path) -> pd.DataFrame:
                         ("Total Interchange (MW)", "interchange")):
         if extra in cols:
             mapping[extra] = name
-    fuels: dict[str, dict[str, str]] = {}
-    for c in cols:
-        m = FUEL_RE.match(c)
-        if m:
-            fuels.setdefault(m.group(1), {})[m.group(2) or "raw"] = c
-    for fuel, variants in fuels.items():
-        mapping[variants.get("Adjusted") or variants.get("raw") or next(iter(variants.values()))] = (
-            "gen_" + slug(fuel))
+    # Fuel columns come in raw, imputed and adjusted versions. When a file carries adjusted
+    # columns, only those are used: EIA's headers contain occasional typos, so pairing each
+    # raw column with its adjusted twin by name is not reliable.
+    fuel_cols = [(c, m.group(1).strip(), m.group(2) or "raw")
+                 for c in cols if (m := FUEL_RE.match(c))]
+    wanted = "Adjusted" if any(v == "Adjusted" for _, _, v in fuel_cols) else "raw"
+    for c, fuel, variant in fuel_cols:
+        if variant == wanted:
+            mapping[c] = "gen_" + slug(fuel)
 
     parts = []
     reader = pd.read_csv(path, dtype=str, encoding="utf-8-sig", chunksize=200_000,
