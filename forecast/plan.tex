@@ -1,0 +1,51 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}\usepackage[sc]{mathpazo}\linespread{1.02}
+\usepackage[a4paper,margin=1.55cm,top=1.3cm,bottom=1.3cm]{geometry}
+\usepackage{amsmath,booktabs,enumitem,microtype,xcolor,titlesec}
+\definecolor{linkblue}{HTML}{1F4E9A}
+\usepackage[colorlinks=true,urlcolor=linkblue,linkcolor=linkblue]{hyperref}
+\setlist{itemsep=1pt,topsep=2pt,leftmargin=1.3em}
+\titleformat{\section}{\normalsize\bfseries}{\thesection.}{0.4em}{}
+\titlespacing*{\section}{0pt}{7pt}{2pt}
+\pagestyle{empty}\setlength{\parindent}{0pt}\setlength{\parskip}{3pt}
+\begin{document}\small
+\begin{center}
+{\large\bfseries Did the forecast load arrive? PJM zonal load forecasts against metered demand, 2019--2026\par}
+\vspace{3pt}{\small Research plan, written before the analysis \quad$\cdot$\quad Sahil, MSE Data Science, Johns Hopkins University \quad$\cdot$\quad November 2026}
+\end{center}
+
+\section{Question}
+PJM's capacity auctions clear against its own load forecast, and since 2023 that forecast has been revised sharply upward for data centers. The resulting capacity prices are at the center of the debate over household bills. Analysts argue the forecasts are inflated by speculative requests; PJM and utilities argue the load is real. \textbf{Has the load that PJM forecast for data-center zones actually shown up in metered demand, and what did the forecast error cost?}
+
+\section{What is known}
+Retail and wholesale price effects of data centers are now studied by several teams, with conflicting signs (EPRI 2026; Meeks et al., MIT CEEPR 2026; Rana et al., SSRN 2026; Kay et al., Dallas Fed 2026). Evidence that forecasts overstate load comes mostly from analyst benchmarks (Grid Strategies 2025) and PJM's own accuracy report (2026). In a first search I did not find a peer-reviewed test of zonal forecast error against independent metered data with a comparison group. A full literature search is step one.
+
+\section{Hypotheses (fixed in advance)}
+\begin{itemize}
+\item[H1] After PJM begins adjusting a zone's forecast for data centers, that zone's forecasts become biased upward relative to unadjusted zones.
+\item[H2] The bias grows with forecast horizon.
+\item[H3] Revisions between forecast vintages do not predict realized growth one-for-one (forecast inefficiency).
+\end{itemize}
+
+\section{Data (all public; feasibility confirmed)}
+\begin{itemize}
+\item \textbf{Forecasts:} PJM Load Forecast Reports, January 2019--2026. All eight download. Zonal annual net energy (Table E-1), summer peaks (B-1) and the zones adjusted for large loads (B-9).
+\item \textbf{Realized load:} EIA Form 930 hourly demand for PJM zones, already cleaned in my grid study pipeline.
+\item \textbf{Supporting:} PJM weather-normalized zonal peaks; PJM data center accuracy report; capacity auction parameters.
+\end{itemize}
+\textbf{Feasibility check.} For 2025, one year ahead, realized zonal energy differs from PJM's January 2025 forecast by a median of 1.5\% in absolute value across 19 zones, so the two sources measure the same quantity. AEP came in 0.4\% below forecast and Dominion 2.8\% above. One zone (EKPC) differs by 25\% and reflects a boundary mismatch to resolve or exclude. The overstatement hypothesis is therefore not obviously true at short horizons, which makes it a real question.
+
+\section{Design}
+For zone $z$, forecast vintage $v$ and horizon $h$, the error is $e_{zvh} = \log(\text{realized}_{z,v+h}) - \log(\text{forecast}_{zvh})$. The main specification is
+\[ e_{zvh} = \beta\,(\text{Adjusted}_{zv}) + \alpha_z + \gamma_{vh} + \varepsilon_{zvh}, \]
+where $\text{Adjusted}_{zv}$ marks zones whose vintage-$v$ forecast carries a data-center adjustment, $\alpha_z$ are zone effects and $\gamma_{vh}$ vintage-by-horizon effects, which absorb weather and economy-wide surprises common to all zones. $\beta<0$ supports H1. Inference clusters by zone with a wild bootstrap (19 clusters). H2 interacts the adjustment with horizon. H3 is a Mincer--Zarnowitz regression of realized growth on forecast growth. An event-study version checks for differences before adjustments began. If $\beta$ is established, the last step converts the forecast error into megawatts of procured capacity and dollars using the published auction demand curve.
+
+\section{Decided now}
+Primary outcome: annual net energy (least weather-sensitive). Secondary: weather-normalized summer peak. Sample: all zones with consistent boundaries; exclusions fixed before estimation. Treatment definition taken from PJM's Table B-9, not from realized growth.
+
+\section{Limits}
+Large adjustments are recent, so only horizons of one to three years can be evaluated today; the study is built to be re-run each January. Nineteen zones limit power. PJM's accuracy report covers related ground with internal data; this study adds independent data, a comparison group and a cost estimate.
+
+\section{Timeline and what I am asking for}
+Weeks 1--2 literature search; 3--4 extract all vintages and reconcile zone definitions; 5--6 main estimates; 7--8 robustness and cost translation; 9--10 draft. I would value a faculty reader for this plan before any estimation, and advice on the capacity-cost step and a suitable venue.
+\end{document}
