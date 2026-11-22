@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What comes next | Grid / Data Centers</title>
+<meta name="description" content="Related work and the pre-specified follow-up study on whether forecast data center load has arrived.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M4 22h8l6-4 10-10' fill='none' stroke='%23d95926' stroke-width='3'/%3E%3Cpath d='M4 22h8l6-1 10-2' fill='none' stroke='%233987e5' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=2">
+</head>
+<body>
+<main>
+<header class="pagehead"><p class="crumbs"><a href="index.html">Overview</a> / What comes next</p><h1>What comes next</h1><p>This study measured what has already happened. The next one tests a claim people are arguing about: that the forecasts driving capacity prices are inflated.</p></header>
+<section class="block detail"><h2>Where this study sits</h2>
+<p>Before choosing a next step I checked what is already published. Two obvious follow-ups turned out to be crowded.</p>
+<ul class="keylist">
+<li><b>Who pays</b><span>At least five 2026 papers estimate what data centers do to electricity prices, and they disagree on the sign. <a href="https://arxiv.org/abs/2606.19777">An EPRI study</a> finds retail rates fell; <a href="https://ceepr.mit.edu/workingpaper/who-pays-for-growth-evidence-from-datacenters-and-the-grid/">an MIT CEEPR paper</a> finds they rose, most at investor-owned utilities; <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7580459">an SSRN paper</a> already uses synthetic control on retail prices; and <a href="https://ideas.repec.org/p/fip/feddwp/102959.html">a Dallas Fed paper</a> attributes a 3 to 5% rise in wholesale prices to existing data centers.</span></li>
+<li><b>Whose air</b><span><a href="https://news.mit.edu/2026/study-reveals-data-centers-long-distance-damage-air-quality-1119">An MIT study</a> and <a href="https://www.nber.org/system/files/working_papers/w35100/w35100.pdf">an NBER working paper</a> already estimate the health and climate damages from data center electricity use, with atmospheric models this project does not have.</span></li>
+<li><b>This study</b><span>Those papers start from data center databases or dispatch models. This one starts from metered demand. <a href="https://www.pjm.com/-/media/DotCom/planning/res-adeq/load-forecast/2026-load-forecast-accuracy-report.pdf">PJM&rsquo;s own accuracy report</a> gives an outside check: at the July 2025 peak, 68.1% of PJM&rsquo;s data center load was in the Dominion zone and 21.1% in AEP, the same two zones this analysis singled out.</span></li>
+</ul>
+<p class="fine" style="margin-top:22px">This was a first-pass search, not a full literature review.</p></section>
+<section class="block detail"><h2>The open question: did the forecast load arrive?</h2>
+<p>PJM&rsquo;s capacity auctions clear against its own load forecast, and that forecast has been revised sharply upward for data centers. <a href="https://gridstrategiesllc.com/wp-content/uploads/Grid-Strategies-National-Load-Growth-Report-2025.pdf">Analysts argue</a> the forecasts are inflated by speculative requests. I did not find a peer-reviewed test of that against metered demand, zone by zone.</p>
+<p>The design compares each January forecast with the load later metered, by zone and by how far ahead the forecast looked. Zones whose forecasts carry a data center adjustment are compared with zones whose forecasts do not.</p>
+<ul class="keylist">
+<li><b>8 of 8</b><span>PJM Load Forecast Reports, 2019 to 2026, retrieved with zonal energy and peak tables.</span></li>
+<li><b>1.5%</b><span>Median gap between PJM&rsquo;s January 2025 forecast and realized 2025 energy across 19 zones. The two sources measure the same quantity.</span></li>
+<li><b>&minus;0.4% and +2.8%</b><span>AEP and Dominion in 2025, realized against forecast, one year ahead. At this short horizon the forecast load did arrive.</span></li>
+</ul>
+<p style="margin-top:30px">These are preliminary feasibility results from 22 November 2026, not findings. The auctions depend on forecasts three or more years out, which can only be evaluated as more years accumulate. One zone, East Kentucky, differs by 25% and has a boundary mismatch to resolve.</p>
+<p style="margin-top:34px"><a class="btn" href="forecast-plan.pdf">Read the research plan (PDF)</a></p>
+<p class="fine" style="margin-top:22px">The plan fixes the hypotheses, the outcome and the sample rules before any estimation.</p></section>
+</main>
+<div class="prevnext"></div>
+<footer>
+  <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
+  <p id="f-updated"></p>
+</footer>
+<script src="assets/site.js?v=3"></script>
+</body>
+</html>

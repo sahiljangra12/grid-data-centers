@@ -13,7 +13,8 @@ Pages: [overview](https://sahiljangra12.github.io/grid-data-centers/) ·
 [regions](https://sahiljangra12.github.io/grid-data-centers/regions.html) ·
 [carbon](https://sahiljangra12.github.io/grid-data-centers/carbon.html) ·
 [live grid](https://sahiljangra12.github.io/grid-data-centers/live.html) ·
-[technical report](https://sahiljangra12.github.io/grid-data-centers/report.html)
+[technical report](https://sahiljangra12.github.io/grid-data-centers/report.html) ·
+[what comes next](https://sahiljangra12.github.io/grid-data-centers/next.html)
 ([PDF](https://sahiljangra12.github.io/grid-data-centers/report.pdf))
 
 ## What it finds

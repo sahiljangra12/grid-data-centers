@@ -49,12 +49,15 @@ Utilities and grid operators have reported sharp increases in requests to connec
 
 PJM is the natural place to look. It is the largest U.S.\ grid operator, it contains Northern Virginia, the largest data center market in the world, and it publishes hourly demand for each of its utility zones. Zones inside one market share weather systems, fuel prices and a regional economy, which makes them usable as comparisons for one another.
 
+\paragraph{Related work.} Several 2026 studies ask what data centers do to prices, with conflicting answers. An EPRI study finds that data center growth lowered average retail rates \cite{epri2026}; Meeks et al.\ find that data center entry raised them, most at investor-owned utilities \cite{meeks2026}; Rana et al.\ apply synthetic control to retail prices \cite{rana2026}; and Kay et al.\ use a dispatch model to attribute a 3 to 5\% rise in wholesale prices to existing data centers \cite{kay2026}. Muller prices the air pollution and greenhouse gas damages \cite{muller2026}. These papers start from data center capacity databases or dispatch models. This report starts from the other end, with metered zonal demand, and asks how much load has measurably arrived. It is closest in spirit to PJM's own forecast accuracy report \cite{pjmaccuracy}, which uses internal data.
+
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*)]
 \item A zone-level comparison of demand growth before and after 2023 across all <<NZ>> usable PJM zones (Section~\ref{sec:zones}).
 \item Synthetic control estimates for the two zones that stand out, with placebo inference, leave-one-out refits and a placebo start date (Section~\ref{sec:scm}).
 \item Structural break dates for each zone's share of PJM demand (Section~\ref{sec:timing}).
 \item Marginal emission factors for ten grid regions, and the emissions implied by the additional load (Sections~\ref{sec:mef} and~\ref{sec:emissions}).
+\item A pre-specified follow-up on whether forecast load has arrived, with a first feasibility result (Section~\ref{sec:next}).
 \item A reproducible pipeline: every number, table and figure in this report is regenerated from the public data by one command (Section~\ref{sec:repro}).
 \end{enumerate}
 
@@ -192,7 +195,7 @@ Summing the acceleration estimates for the two zones gives <<N_MW>>~MW of demand
 
 \section{Limitations}\label{sec:limits}
 \begin{itemize}
-\item \textbf{Attribution.} EIA-930 reports demand by zone. Factories, electrification and population growth also add load. The case for data centers rests on location, timing, the flatness of the added load and public reporting, not on direct observation.
+\item \textbf{Attribution.} EIA-930 reports demand by zone. Factories, electrification and population growth also add load. The case for data centers rests on location, timing, the flatness of the added load and public reporting, not on direct observation. One external check is available: PJM reports that at the July 2025 peak, 68.1\% of its data center load was in the Dominion zone and 21.1\% in AEP \cite{pjmaccuracy}, the same two zones this analysis singles out.
 \item \textbf{Selection of AEP.} AEP was identified from the data. Its $p$-value does not account for having searched across zones for the largest change.
 \item \textbf{Coarse inference.} Placebo $p$-values cannot fall below <<MINP>> with this many zones.
 \item \textbf{Emission factors.} One national factor per fuel ignores differences in plant efficiency. Marginal gas units are often less efficient than the fleet average, so the marginal factor here is more likely too low than too high.
@@ -200,6 +203,11 @@ Summing the acceleration estimates for the two zones gives <<N_MW>>~MW of demand
 \item \textbf{Short-run margin.} The marginal factor describes which existing plants respond hour to hour. It does not capture new plants built, or retirements delayed, because of sustained load growth.
 \item \textbf{Behind-the-meter supply.} Data centers with on-site generation do not appear in zonal demand.
 \end{itemize}
+
+\section{Next step: did the forecast load arrive?}\label{sec:next}
+PJM's capacity auctions clear against its load forecast, which has been revised sharply upward for data centers. Analysts argue that the forecasts are inflated by speculative requests \cite{gridstrategies}. The natural follow-up to this report is to test that against metered demand: compare each January forecast, by zone and horizon, with the load that was later metered, and compare zones whose forecasts carry a data center adjustment with zones whose forecasts do not.
+
+A feasibility check has been run and nothing more; the result below is preliminary (22 November 2026). All eight PJM Load Forecast Reports from 2019 to 2026 can be retrieved. For calendar year 2025, one year ahead, realized zonal energy from EIA-930 differs from PJM's January 2025 forecast by a median of 1.5\% in absolute value across 19 zones, so the two sources are comparable. AEP came in 0.4\% below its forecast and Dominion 2.8\% above. At this short horizon the forecast load did arrive. The open question is the longer horizons that the auctions depend on, which can only be evaluated as more years accumulate. The hypotheses, outcome and sample rules for that study are written down in advance in a separate research plan, available on the project website.
 
 \section{Reproducibility}\label{sec:repro}
 The pipeline is a downloader, the analysis, a test suite and the script that builds this report. It needs no API key and runs in about two minutes on a standard GitHub Actions runner, which re-executes it every Monday. Random seeds are fixed. This report is regenerated by \texttt{report/build\_report.py} from the same results file the website reads, so the two cannot disagree. Code: \url{https://github.com/sahiljangra12/grid-data-centers}. Website: \url{https://sahiljangra12.github.io/grid-data-centers/}.
@@ -210,9 +218,16 @@ The pipeline is a downloader, the analysis, a test suite and the script that bui
 \bibitem{andrews} Andrews, D.~W.~K. (1993). Tests for parameter instability and structural change with unknown change point. \emph{Econometrica}, 61(4).
 \bibitem{callaway} Callaway, D.~S., Fowlie, M., and McCormick, G. (2018). Location, location, location: The variable value of renewable energy and demand-side efficiency resources. \emph{Journal of the Association of Environmental and Resource Economists}, 5(1).
 \bibitem{doudchenko} Doudchenko, N., and Imbens, G.~W. (2016). Balancing, regression, difference-in-differences and synthetic control methods: A synthesis. NBER Working Paper 22791.
+\bibitem{epri2026} EPRI (2026). Have data centers raised your electric bill? arXiv:2606.19777.
+\bibitem{gridstrategies} Grid Strategies (2025). Power demand forecasts revised up: National load growth report.
 \bibitem{hawkes} Hawkes, A.~D. (2010). Estimating marginal CO$_2$ emissions rates for national electricity systems. \emph{Energy Policy}, 38(10).
+\bibitem{kay2026} Kay, O., Reaser, R., and Taylor, R. (2026). Processing power: The effect of data centers on wholesale electricity markets. Federal Reserve Bank of Dallas Working Paper 2606.
 \bibitem{kunsch} K\"unsch, H.~R. (1989). The jackknife and the bootstrap for general stationary observations. \emph{Annals of Statistics}, 17(3).
+\bibitem{meeks2026} Meeks, R., Pless, J., Qi, Z., and Wang, Z. (2026). Who pays for growth? Evidence from data centers and the grid. MIT CEEPR Working Paper.
+\bibitem{muller2026} Muller, N.~Z. (2026). Measuring the impact of data centers in the United States economy: Monetary damage from air pollution and greenhouse gas emissions. NBER Working Paper 35100.
 \bibitem{neweywest} Newey, W.~K., and West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \emph{Econometrica}, 55(3).
+\bibitem{pjmaccuracy} PJM Interconnection (2026). 2026 PJM load forecast accuracy report.
+\bibitem{rana2026} Rana, V., Kaps, C., and Netessine, S. (2026). The cost of intelligence: Impacts of AI data centers on US electricity prices. SSRN Working Paper.
 \bibitem{silerevans} Siler-Evans, K., Azevedo, I.~L., and Morgan, M.~G. (2012). Marginal emissions factors for the U.S.\ electricity system. \emph{Environmental Science \& Technology}, 46(9).
 \bibitem{eia930} U.S.\ Energy Information Administration. Form EIA-930, Hourly Electric Grid Monitor. \url{https://www.eia.gov/electricity/gridmonitor/}.
 \bibitem{eiafaq} U.S.\ Energy Information Administration. How much carbon dioxide is produced per kilowatthour of U.S.\ electricity generation? \url{https://www.eia.gov/tools/faqs/faq.php?id=74}.

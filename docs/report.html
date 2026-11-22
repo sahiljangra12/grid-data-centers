@@ -99,7 +99,9 @@
 <li><strong>Behind-the-meter supply.</strong> Data centers with on-site generation do not appear in zonal demand.</li>
 </ul>
 
-<h2>7. Reproducibility</h2>
+<h2>7. Next step: did the forecast load arrive?</h2>
+<p>PJM&rsquo;s capacity auctions clear against its load forecast, which has been revised sharply upward for data centers. The follow-up to this report tests whether that forecast load has arrived in metered demand, comparing zones whose forecasts carry a data center adjustment with zones whose forecasts do not. A feasibility check has been run and nothing more: for 2025, one year ahead, realized zonal energy differs from PJM&rsquo;s January 2025 forecast by a median of 1.5% across 19 zones; AEP came in 0.4% below forecast and Dominion 2.8% above. The related literature, this preliminary result and the pre-specified plan are on the <a href="next.html">Next</a> page.</p>
+<h2>8. Reproducibility</h2>
 <p>The pipeline is three Python scripts: a downloader, the analysis and a test suite. It needs no API key and runs in about two minutes on a standard GitHub Actions runner, which re-executes it every Monday and republishes the results file this report reads. Random seeds are fixed. The repository contains the exact code that produced every number here.</p>
 
 <h2>References</h2>
@@ -123,6 +125,6 @@
   <p>Study and code by Sahil, MSE Data Science, Johns Hopkins University. Data: U.S. Energy Information Administration, Form EIA-930, public domain.</p>
   <p id="f-updated"></p>
 </footer>
-<script src="assets/site.js?v=2"></script>
+<script src="assets/site.js?v=3"></script>
 </body>
 </html>

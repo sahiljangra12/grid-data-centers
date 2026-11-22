@@ -350,7 +350,7 @@ function drawLiveDetail(){
 }
 
 /* ---------- navigation and start-up ---------- */
-const PAGES=[["index.html","Overview"],["zones.html","Zones"],["twin.html","Twin test"],["timing.html","Timing"],["regions.html","Regions"],["carbon.html","Carbon"],["live.html","Live grid"],["report.html","Report"]];
+const PAGES=[["index.html","Overview"],["zones.html","Zones"],["twin.html","Twin test"],["timing.html","Timing"],["regions.html","Regions"],["carbon.html","Carbon"],["live.html","Live grid"],["report.html","Report"],["next.html","Next"]];
 function buildNav(){
   const here=(location.pathname.split("/").pop()||"index.html"),nav=document.createElement("nav");nav.className="nav";nav.setAttribute("aria-label","Pages");
   nav.innerHTML=`<a class="mark" href="index.html">Grid<span>/</span>Data Centers</a><button class="menu" aria-expanded="false" aria-controls="navlist">Menu</button><ul id="navlist">`+PAGES.map(([h,l])=>`<li><a href="${h}"${h===here?' aria-current="page"':""}>${l}</a></li>`).join("")+`<li><a href="https://github.com/sahiljangra12/grid-data-centers">Code</a></li></ul>`;
