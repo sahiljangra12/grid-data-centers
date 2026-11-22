@@ -1,5 +1,5 @@
 {
-  "fetched_at_utc": "2026-11-22 09:34",
+  "fetched_at_utc": "2026-11-22 09:37",
   "source": "EIA Form EIA-930, Hourly Electric Grid Monitor bulk files",
   "files": [
     {
@@ -996,14 +996,13 @@
     "gen_hydropower_excluding_pumped_storage",
     "gen_pumped_storage",
     "gen_solar_without_integrated_battery_storage",
-    "gen_solar_with_integrated_battery_storage",
+    "gen_solar_witho_integrated_battery_storage",
     "gen_wind_without_integrated_battery_storage",
     "gen_wind_with_integrated_battery_storage",
     "gen_battery_storage",
     "gen_other_energy_storage",
     "gen_unknown_energy_storage",
-    "gen_geothermal",
-    "gen_solar_witho_integrated_battery_storage"
+    "gen_geothermal"
   ],
   "zones": [
     "AE",
