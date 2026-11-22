@@ -61,7 +61,7 @@ zone-by-zone comparison, and is reported as such. Each is kept out of the other'
 ```bash
 pip install -r requirements.txt
 python -m pytest -q          # tests on synthetic data with known answers
-python src/fetch_data.py     # downloads about 1 GB from EIA, keeps two small parquet files
+python src/fetch_data.py     # downloads about 1 GB from EIA, keeps two parquet files (not committed)
 python src/analysis.py       # writes docs/data/results.json
 python -m http.server -d docs 8000
 ```
