@@ -234,7 +234,8 @@ def _scm_fit(panel: pd.DataFrame, treated: str, donors: list[str], pre: np.ndarr
             "ratio": rmspe_post / rmspe_pre if rmspe_pre > 0 else np.nan}
 
 
-def synthetic_control(monthly_mean: pd.DataFrame, treated: str, detrend: bool = False) -> dict | None:
+def synthetic_control(monthly_mean: pd.DataFrame, treated: str, detrend: bool = False,
+                      exclude: tuple[str, ...] = (), t0: pd.Timestamp = T0) -> dict | None:
     """Synthetic control on log monthly demand, each zone measured against its own pre-period mean.
 
     detrend=True also removes each zone's own pre-period linear trend (extended forward),
@@ -244,13 +245,14 @@ def synthetic_control(monthly_mean: pd.DataFrame, treated: str, detrend: bool = 
     """
     if treated not in monthly_mean.columns:
         return None
+    monthly_mean = monthly_mean.drop(columns=[c for c in exclude if c in monthly_mean.columns])
     last_ok = monthly_mean[treated].last_valid_index()
     df = monthly_mean.loc[:last_ok]
     keep = [c for c in df.columns if df[c].notna().mean() >= 0.97 and (df[c].dropna() > 0).all()]
     if treated not in keep or len(keep) < 6:
         return None
     df = df[keep].dropna()
-    pre = np.asarray(df.index < T0)
+    pre = np.asarray(df.index < t0)
     if pre.sum() < 24 or (~pre).sum() < 12:
         return None
     logp = np.log(df)
@@ -288,7 +290,7 @@ def synthetic_control(monthly_mean: pd.DataFrame, treated: str, detrend: bool = 
     return {
         "treated": treated, "detrended": detrend,
         "months": month_labels(df.index),
-        "treatment_start": T0.strftime("%Y-%m"),
+        "treatment_start": t0.strftime("%Y-%m"),
         "actual_index": rl(100 * np.exp(panel[treated].values), 2),
         "synthetic_index": rl(100 * np.exp(main["synthetic"]), 2),
         "gap_pct": rl(100 * (np.exp(main["gap"]) - 1), 2),
@@ -359,16 +361,32 @@ def _robust_keep(*arrays: np.ndarray, z: float = 8.0) -> np.ndarray:
     return keep
 
 
-def marginal_emission_factor(g: pd.DataFrame, mask: np.ndarray | None = None) -> dict | None:
-    """Slope of hourly change in CO2 on hourly change in demand (t CO2 per MWh), HAC errors."""
-    dx = g["demand"].diff().values
+def _mef_design(g: pd.DataFrame):
+    """Hourly changes in CO2 and demand, with changes in wind and solar output as controls.
+
+    Wind and solar do not respond to demand, but they ramp at the same hours demand does.
+    Controlling for them keeps their ramps from being mistaken for the grid's response to load.
+    """
     dy = g["co2"].diff().values
+    dx = g["demand"].diff().values
+    controls = []
+    for c in ("wind", "solar"):
+        if c in g.columns and g[c].notna().sum() > 1000 and np.nanstd(g[c].values) > 0:
+            controls.append(np.nan_to_num(g[c].diff().values, nan=0.0))
+    return dy, dx, controls
+
+
+def marginal_emission_factor(g: pd.DataFrame, mask: np.ndarray | None = None) -> dict | None:
+    """Extra tonnes of CO2 per extra MWh of demand, from hourly first differences (HAC errors)."""
+    dy, dx, controls = _mef_design(g)
     keep = _robust_keep(dx, dy)
     if mask is not None:
         keep &= mask
     if keep.sum() < 2000 or np.nanstd(dx[keep]) == 0:
         return None
-    fit = sm.OLS(dy[keep], sm.add_constant(dx[keep])).fit(cov_type="HAC", cov_kwds={"maxlags": 24})
+    X = np.column_stack([np.ones(keep.sum()), dx[keep]]
+                        + [c[keep] for c in controls if np.std(c[keep]) > 0])
+    fit = sm.OLS(dy[keep], X).fit(cov_type="HAC", cov_kwds={"maxlags": 24})
     b, se = float(fit.params[1]), float(fit.bse[1])
     return {"mef": r(b, 4), "ci": [r(b - 1.96 * se, 4), r(b + 1.96 * se, 4)],
             "se": r(se, 5), "r2": r(fit.rsquared, 3), "n_hours": int(keep.sum())}
@@ -376,14 +394,15 @@ def marginal_emission_factor(g: pd.DataFrame, mask: np.ndarray | None = None) ->
 
 def mef_change_test(g: pd.DataFrame) -> dict | None:
     """Did the marginal emission factor change after the build-out began? (interaction test)"""
-    dx = g["demand"].diff().values
-    dy = g["co2"].diff().values
+    dy, dx, controls = _mef_design(g)
     keep = _robust_keep(dx, dy)
     post = np.asarray(g.index >= T0, dtype=float)
     if keep.sum() < 5000 or post[keep].sum() < 2000 or (1 - post[keep]).sum() < 2000:
         return None
-    X = np.column_stack([np.ones(keep.sum()), dx[keep], post[keep], dx[keep] * post[keep]])
-    fit = sm.OLS(dy[keep], X).fit(cov_type="HAC", cov_kwds={"maxlags": 24})
+    cols = [np.ones(keep.sum()), dx[keep], post[keep], dx[keep] * post[keep]]
+    for c in controls:
+        cols += [v for v in (c[keep], c[keep] * post[keep]) if np.std(v) > 0]
+    fit = sm.OLS(dy[keep], np.column_stack(cols)).fit(cov_type="HAC", cov_kwds={"maxlags": 24})
     b, c = float(fit.params[1]), float(fit.params[3])
     cov = fit.cov_params()
     se_after = float(np.sqrt(cov[1, 1] + cov[3, 3] + 2 * cov[1, 3]))
@@ -394,20 +413,29 @@ def mef_change_test(g: pd.DataFrame) -> dict | None:
             "p_value": r(fit.pvalues[3], 4), "n_hours": int(keep.sum())}
 
 
+DISPATCHABLE = ["gas", "coal", "hydro", "nuclear", "other"]
+
+
 def marginal_fuel_mix(g: pd.DataFrame, mask: np.ndarray) -> dict | None:
-    """Share of each fuel in an hourly change in total generation (shares sum to one)."""
-    cols = [c for c in FUEL_GROUPS if c in g.columns]
-    parts = g[cols].fillna(0)
-    total = parts.sum(axis=1).where(g["generation"].notna())
-    dx = total.diff().values
+    """Which sources answer one extra MWh of demand, holding wind and solar output fixed.
+
+    Each dispatchable source's hourly change is regressed on the change in demand. What the
+    region's own plants do not cover is met by imports (or lower exports).
+    """
+    _, dx, controls = _mef_design(g)
     keep = _robust_keep(dx) & mask
+    for c in DISPATCHABLE:
+        if c in g.columns:
+            keep &= np.isfinite(g[c].diff().values)
     if keep.sum() < 2000:
         return None
-    X = sm.add_constant(dx[keep])
+    X = np.column_stack([np.ones(keep.sum()), dx[keep]]
+                        + [c[keep] for c in controls if np.std(c[keep]) > 0])
     out = {}
-    for c in cols:
-        dy = parts[c].diff().values[keep]
-        out[c] = r(float(np.linalg.lstsq(X, dy, rcond=None)[0][1]), 4)
+    for c in DISPATCHABLE:
+        if c in g.columns:
+            out[c] = r(float(np.linalg.lstsq(X, g[c].diff().values[keep], rcond=None)[0][1]), 4)
+    out["imports"] = r(1 - sum(v for v in out.values() if v is not None), 4)
     return out
 
 
@@ -442,7 +470,8 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
     core = [z for z in zm.columns if zm[z].notna().mean() >= 0.97]
     if C.TREATED_ZONE not in core:
         raise RuntimeError(f"Zone {C.TREATED_ZONE} lacks enough valid months for the analysis.")
-    others = [z for z in core if z != C.TREATED_ZONE]
+    hot = [z for z in C.HOT_ZONES if z in core]
+    others = [z for z in core if z not in hot]
     pjm_total = zm[core].sum(axis=1, min_count=len(core))
     rest_hourly = zone_clean[others].sum(axis=1, min_count=len(others))
     rest_m = monthly_stats(rest_hourly.to_frame("rest"))
@@ -451,9 +480,10 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
     regions = {}
     series_sets = {ba: (ba_m["mean"][ba], ba_m["p05"][ba], C.BALANCING_AUTHORITIES[ba])
                    for ba in ba_m["mean"].columns if ba in C.BALANCING_AUTHORITIES}
-    series_sets["DOM_ZONE"] = (zm[C.TREATED_ZONE], zone_m["p05"][C.TREATED_ZONE],
-                               "Dominion zone (Northern Virginia)")
-    series_sets["PJM_REST"] = (rest_m["mean"]["rest"], rest_m["p05"]["rest"], "Rest of PJM")
+    for z in hot:
+        series_sets[f"{z}_ZONE"] = (zm[z], zone_m["p05"][z], C.HOT_ZONES[z])
+    series_sets["PJM_REST"] = (rest_m["mean"]["rest"], rest_m["p05"]["rest"],
+                               f"Rest of PJM ({len(others)} zones)")
     month_axis = ba_m["mean"].index.union(zm.index)
     for key, (mean_s, p05_s, label) in series_sets.items():
         base_trend, mean_trend = piecewise_trend(p05_s), piecewise_trend(mean_s)
@@ -467,32 +497,52 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
             "latest_12m_mean_mw": r(mean_s.dropna().tail(12).mean(), 0),
         }
 
-    # ---- 2. Dominion's share of PJM load, and the break test
-    share = (100 * zm[C.TREATED_ZONE] / pjm_total).dropna()
-    share_roll = share.rolling(12, min_periods=11).mean()
-    brk = trend_break_test(share, n_boot=n_boot)
-    share_out = {
-        "months": month_labels(share.index), "share_pct": rl(share, 3),
-        "share_12m_pct": rl(share_roll, 3),
-        "first_year_avg_pct": r(share[share.index.year == share.index.year.min()].mean(), 2),
-        "latest_12m_avg_pct": r(share.tail(12).mean(), 2),
-        "break_test": brk, "n_zones": len(core),
-    }
+    # ---- zone-by-zone change in growth (which zones sped up, and by how much)
+    zone_trends = []
+    for z in core:
+        mt, bt = piecewise_trend(zm[z]), piecewise_trend(zone_m["p05"][z])
+        if mt and bt:
+            zone_trends.append({"zone": z, "hot": z in hot, "mean": mt, "baseload": bt,
+                                "latest_12m_mean_mw": r(zm[z].dropna().tail(12).mean(), 0)})
+    zone_trends.sort(key=lambda d: -d["mean"]["change_pct_points"])
 
-    # ---- 3. synthetic control
-    scm = synthetic_control(zm[core], C.TREATED_ZONE, detrend=False)
-    scm_detrended = synthetic_control(zm[core], C.TREATED_ZONE, detrend=True)
-    if scm is None:
-        raise RuntimeError("Synthetic control could not be estimated (too few valid zones or months).")
+    # ---- 2. each hot zone's share of PJM load, and the break test
+    share_out = {}
+    for z in hot:
+        share = (100 * zm[z] / pjm_total).dropna()
+        share_out[z] = {
+            "months": month_labels(share.index), "share_pct": rl(share, 3),
+            "share_12m_pct": rl(share.rolling(12, min_periods=11).mean(), 3),
+            "first_year_avg_pct": r(share[share.index.year == share.index.year.min()].mean(), 2),
+            "latest_12m_avg_pct": r(share.tail(12).mean(), 2),
+            "break_test": trend_break_test(share, n_boot=n_boot), "n_zones": len(core),
+        }
+
+    # ---- 3. synthetic control (each hot zone is kept out of the other's comparison pool)
+    scm_all = {}
+    for z in hot:
+        excl = tuple(h for h in hot if h != z)
+        raw = synthetic_control(zm[core], z, detrend=False, exclude=excl)
+        if raw is None:
+            raise RuntimeError(f"Synthetic control for {z} could not be estimated.")
+        # Placebo in time: pretend the build-out began two years early, using only pre-2023 data.
+        fake = synthetic_control(zm[core].loc[zm.index < T0], z, exclude=excl,
+                                 t0=T0 - pd.DateOffset(years=2))
+        raw["placebo_in_time"] = None if fake is None else {
+            "fake_start": fake["treatment_start"], "gap_pct": fake["recent_gap_pct"],
+            "rank": fake["rank"], "p_value": fake["placebo_p_value"]}
+        scm_all[z] = {"levels": raw,
+                      "acceleration": synthetic_control(zm[core], z, detrend=True, exclude=excl)}
 
     # ---- load factor (flat, round-the-clock load raises it)
     def load_factor(hourly: pd.Series) -> dict:
         by = hourly.groupby(hourly.index.year)
         ok = by.count() >= 24 * 330
-        lf = (by.mean() / by.max())[ok]
+        lf = (by.mean() / by.quantile(0.999))[ok]   # 99.9th percentile as the peak
         return {"years": [int(y) for y in lf.index], "load_factor_pct": rl(100 * lf, 2)}
 
-    load_factors = {"DOM_ZONE": load_factor(zone_clean[C.TREATED_ZONE]), "PJM_REST": load_factor(rest_hourly)}
+    load_factors = {f"{z}_ZONE": load_factor(zone_clean[z]) for z in hot}
+    load_factors["PJM_REST"] = load_factor(rest_hourly)
 
     # ---- 4-6. emissions
     emissions, pjm_gen = {}, None
@@ -525,23 +575,37 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
             "generation_mix": yearly_mix(g),
         }
 
-    # ---- headline: what the extra Dominion load implies for emissions
+    # ---- headline: what the extra load in the hot zones implies for emissions
     headline = None
     pjm = emissions.get(C.SUBREGION_PARENT)
     if pjm and pjm.get("change_test"):
         mef, mef_ci = pjm["change_test"]["after"], pjm["change_test"]["after_ci"]
         aef = [y["average_intensity"] for y in pjm["by_year"] if not y["partial_year"]][-1]
-        mw, mw_lo, mw_hi = scm["recent_gap_mw"], *scm["recent_gap_mw_leave_one_out"]
         mt = lambda mw_, f: mw_ * 8760 * f / 1e6  # noqa: E731
+
+        def total(kind: str) -> dict | None:
+            fits = [scm_all[z][kind] for z in hot]
+            if any(f is None for f in fits):
+                return None
+            mw = sum(f["recent_gap_mw"] for f in fits)
+            lo = sum(min(f["recent_gap_mw_leave_one_out"]) for f in fits)
+            hi = sum(max(f["recent_gap_mw_leave_one_out"]) for f in fits)
+            return {"by_zone_mw": {z: f["recent_gap_mw"] for z, f in zip(hot, fits)},
+                    "extra_load_mw": r(mw, 0), "extra_load_mw_range": [r(lo, 0), r(hi, 0)],
+                    "extra_twh_per_year": r(mw * 8760 / 1e6, 1),
+                    "mt_co2_per_year": r(mt(mw, mef), 1),
+                    "mt_co2_range": [r(mt(lo, mef_ci[0]), 1), r(mt(hi, mef_ci[1]), 1)],
+                    "mt_co2_if_average_factor": r(mt(mw, aef), 1)}
+
         headline = {
-            "extra_load_mw": mw, "extra_load_mw_range": [mw_lo, mw_hi],
-            "extra_twh_per_year": r(mw * 8760 / 1e6, 2),
+            "zones": hot, "window": scm_all[hot[0]]["levels"]["recent_window"],
+            # beyond each zone's own pre-2023 trend (the stricter reading)
+            "since_2023": total("acceleration"),
+            # all divergence from comparison zones since the 2019-22 baseline
+            "since_baseline": total("levels"),
             "pjm_marginal_factor": mef, "pjm_marginal_factor_ci": mef_ci,
             "pjm_average_factor": aef,
-            "extra_mt_co2_per_year_marginal": r(mt(mw, mef), 2),
-            "extra_mt_co2_range": [r(mt(min(mw_lo, mw_hi), mef_ci[0]), 2), r(mt(max(mw_lo, mw_hi), mef_ci[1]), 2)],
-            "extra_mt_co2_per_year_if_average_used": r(mt(mw, aef), 2),
-            "understatement_pct_if_average_used": r(100 * (1 - aef / mef), 1) if mef else None,
+            "marginal_vs_average_pct": r(100 * (mef / aef - 1), 1) if aef else None,
         }
 
     # ---- most recent week on the PJM grid
@@ -560,14 +624,15 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
             "source": "U.S. Energy Information Administration, Form EIA-930 (Hourly Electric Grid Monitor)",
             "data_start": str(bal["utc"].min())[:10], "data_end": str(bal["utc"].max())[:16],
             "hours_analyzed": int(len(ba_clean)), "treatment_start": T0.strftime("%Y-%m"),
-            "treated_zone": C.TREATED_ZONE, "zones_used": core,
+            "treated_zone": C.TREATED_ZONE, "hot_zones": {z: C.HOT_ZONES[z] for z in hot},
+            "zones_used": core,
             "emission_factors_t_per_mwh": C.EMISSION_FACTORS,
             "months": month_labels(month_axis),
             "cleaning": {"balancing_authorities": ba_report,
                          "zones": {z: zone_report[z] for z in core}},
         },
-        "regions": regions, "dominion_share": share_out,
-        "synthetic_control": scm, "synthetic_control_detrended": scm_detrended,
+        "regions": regions, "zone_trends": zone_trends, "zone_share": share_out,
+        "synthetic_control": scm_all,
         "load_factor": load_factors, "emissions": emissions,
         "headline": headline, "latest_week_pjm": latest,
     }
@@ -581,14 +646,21 @@ def run(balance_path: Path = C.BALANCE_FILE, subregion_path: Path = C.SUBREGION_
 
 
 def summarize(res: dict) -> None:
-    s, sd, h = res["synthetic_control"], res["synthetic_control_detrended"], res["headline"]
+    h = res["headline"]
     print(f"Data: {res['meta']['data_start']} to {res['meta']['data_end']}")
-    print(f"Dominion share of PJM: {res['dominion_share']['first_year_avg_pct']}% -> "
-          f"{res['dominion_share']['latest_12m_avg_pct']}%; break {res['dominion_share']['break_test']}")
-    print(f"SCM gap {s['recent_gap_pct']}% = {s['recent_gap_mw']} MW, p={s['placebo_p_value']}, "
-          f"pre-RMSPE {s['rmspe_pre_pct']}%, weights {s['weights']}")
-    if sd:
-        print(f"SCM detrended gap {sd['recent_gap_pct']}% = {sd['recent_gap_mw']} MW, p={sd['placebo_p_value']}")
+    for z, sh in res["zone_share"].items():
+        print(f"{z} share of PJM: {sh['first_year_avg_pct']}% -> {sh['latest_12m_avg_pct']}%; "
+              f"break {sh['break_test']}")
+    for z, both in res["synthetic_control"].items():
+        for kind, s in both.items():
+            if s:
+                print(f"SCM {z} {kind}: gap {s['recent_gap_pct']}% = {s['recent_gap_mw']} MW "
+                      f"(loo {s['recent_gap_mw_leave_one_out']}), p={s['placebo_p_value']} "
+                      f"rank {s['rank']}, pre-RMSPE {s['rmspe_pre_pct']}%, weights {s['weights']}")
+    for zt in res["zone_trends"]:
+        m = zt["mean"]
+        print(f"  zone {zt['zone']:5s} mean growth {m['growth_before_pct']:>6}%/yr -> "
+              f"{m['growth_after_pct']:>6}%/yr (change {m['change_pct_points']}, p={m['change_p_value']})")
     for k, v in res["regions"].items():
         b = v["baseload_trend"]
         print(f"  {k:9s} baseload growth {b['growth_before_pct']:>6}%/yr -> {b['growth_after_pct']:>6}%/yr "
@@ -597,7 +669,8 @@ def summarize(res: dict) -> None:
         c = v["change_test"]
         if c:
             print(f"  {k:5s} MEF {c['before']} -> {c['after']} (p={c['p_value']}); "
-                  f"AEF latest {v['by_year'][-1]['average_intensity']}")
+                  f"AEF latest {v['by_year'][-1]['average_intensity']}; mix after {v['marginal_mix_after']}")
+    print(f"Load factor: {res['load_factor']}")
     print(f"Headline: {h}")
 
 

@@ -26,17 +26,20 @@ def results(tmp_path_factory):
 def test_output_is_valid_json(results):
     res, d = results
     loaded = json.loads((d / "results.json").read_text())
-    for key in ("meta", "regions", "dominion_share", "synthetic_control", "emissions", "headline"):
+    for key in ("meta", "regions", "zone_trends", "zone_share", "synthetic_control", "emissions", "headline"):
         assert loaded[key] is not None
 
 
 def test_synthetic_control_recovers_planted_effect(results):
-    scm = results[0]["synthetic_control"]
+    scm = results[0]["synthetic_control"]["DOM"]["levels"]
     # DOM gains 10%/yr extra after 2023; the last 12 months of a 3-year post period average ~2.5 years in.
     expected = 100 * (np.exp(synthetic.TRUE_EXTRA_GROWTH * 2.5) - 1)
     assert abs(scm["recent_gap_pct"] - expected) < 4
     assert scm["rmspe_pre_pct"] < 2
-    assert scm["placebo_p_value"] <= 0.11  # smallest possible with 9 donors is 0.10
+    assert scm["placebo_p_value"] <= 0.12  # smallest possible with 8 donors is 0.11
+    # The zone with no planted effect should show none.
+    null = results[0]["synthetic_control"]["AEP"]["levels"]
+    assert abs(null["recent_gap_pct"]) < 2 and null["placebo_p_value"] > 0.2
     assert abs(sum(scm["weights"].values()) - 1) < 0.05
 
 
@@ -48,7 +51,7 @@ def test_marginal_emission_factor_recovered(results):
 
 
 def test_break_test_finds_the_kink(results):
-    brk = results[0]["dominion_share"]["break_test"]
+    brk = results[0]["zone_share"]["DOM"]["break_test"]
     assert brk["p_value"] < 0.05
     assert abs(pd.Timestamp(brk["break_month"]) - pd.Timestamp("2023-01-01")).days < 240
 

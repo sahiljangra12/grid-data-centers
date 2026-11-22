@@ -33,7 +33,12 @@ BALANCING_AUTHORITIES = {
 
 # Sub-regions are kept for PJM only: its zones are the unit of the causal design.
 SUBREGION_PARENT = "PJM"
-TREATED_ZONE = "DOM"   # Dominion zone: Northern Virginia's "Data Center Alley"
+TREATED_ZONE = "DOM"   # Dominion zone: Northern Virginia's "Data Center Alley" (chosen in advance)
+# AEP (which includes central Ohio) was not chosen in advance: it surfaced in the zone-by-zone
+# growth comparison as the fastest-accelerating zone. It is analysed as a second hot spot and
+# kept out of Dominion's comparison pool, and vice versa.
+SECOND_ZONE = "AEP"
+HOT_ZONES = {"DOM": "Dominion zone (Northern Virginia)", "AEP": "AEP zone (Ohio and Appalachia)"}
 
 # The public release of ChatGPT (30 Nov 2022) is used as the start of the AI build-out.
 # Everything through December 2022 is "before"; January 2023 onward is "after".
