@@ -28,13 +28,13 @@
 {\small Whiting School of Engineering, Johns Hopkins University, Baltimore, MD, USA\par}
 {\small\texttt{sfnu1@jh.edu}\par}
 \vspace{0.8em}
-{\small November 2026 \quad$\cdot$\quad Data through 2026-11-22, results generated 2026-11-22\par}
+{\small November 2026 \quad$\cdot$\quad Data through 2026-11-24, results generated 2026-11-23\par}
 \end{center}
 
 \vspace{0.6em}
 \begin{center}\textbf{Abstract}\end{center}
 \begin{quote}\small
-Has the build-out of data centers since 2023 left a measurable mark on U.S.\ electricity demand, and what does serving it emit? This report uses 2.1 million hourly records from EIA Form~930, covering 10 balancing authorities and 19 load zones of the PJM Interconnection, from 2019-01-01 to 2026-11-22. Two zones separate from the rest. In the AEP zone (Ohio and Appalachia), yearly demand growth moved from $-$0.8\% to +5.5\%. A synthetic control that tracked the zone within 0.96\% before 2023 is now 14.4\% below it, a gap of 2,163~MW that ranks 1 of 18 zones in placebo tests. The Dominion zone (Virginia) is 29.9\% above its control, but that divergence predates 2023; its speed-up beyond its earlier trend is 751~MW and is not statistically conclusive. Structural break tests date the change to July 2024 in AEP and August 2024 in Dominion. In PJM, one more MWh of demand adds 0.424~t of CO$_2$, 16\% more than the average MWh. Serving the load that is new since 2023 emits about 10.9~Mt of CO$_2$ a year. Demand is observed by zone, not by customer, so attribution to data centers is circumstantial.
+Has the build-out of data centers since 2023 left a measurable mark on U.S.\ electricity demand, and what does serving it emit? This report uses 2.1 million hourly records from EIA Form~930, covering 10 balancing authorities and 19 load zones of the PJM Interconnection, from 2019-01-01 to 2026-11-24. Two zones separate from the rest. In the AEP zone (Ohio and Appalachia), yearly demand growth moved from $-$0.8\% to +5.5\%. A synthetic control that tracked the zone within 0.96\% before 2023 is now 14.4\% below it, a gap of 2,163~MW that ranks 1 of 18 zones in placebo tests. The Dominion zone (Virginia) is 29.9\% above its control, but that divergence predates 2023; its speed-up beyond its earlier trend is 751~MW and is not statistically conclusive. Structural break tests date the change to July 2024 in AEP and August 2024 in Dominion. In PJM, one more MWh of demand adds 0.424~t of CO$_2$, 16\% more than the average MWh. Serving the load that is new since 2023 emits about 10.9~Mt of CO$_2$ a year. Demand is observed by zone, not by customer, so attribution to data centers is circumstantial.
 \end{quote}
 \noindent{\small\textbf{Keywords:} electricity demand; data centers; synthetic control; structural break; marginal emissions; PJM; EIA-930}
 
@@ -64,7 +64,7 @@ PJM is the natural place to look. It is the largest U.S.\ grid operator, it cont
 \section{Data}
 
 \subsection{Source}
-All data comes from the U.S.\ Energy Information Administration's Form EIA-930, the Hourly Electric Grid Monitor \cite{eia930}, downloaded as six-month bulk files. Two tables are used: the balance table (hourly demand, net generation and generation by energy source for each balancing authority) and the subregion table (hourly demand for zones within the larger authorities). The sample runs from 2019-01-01 to 2026-11-22. Ten balancing authorities are kept: PJM, ERCOT, MISO, SPP, NYISO, ISO-NE, CAISO, Southern Company, TVA and Duke Energy Carolinas. EIA's anomaly-adjusted columns are used where they exist.
+All data comes from the U.S.\ Energy Information Administration's Form EIA-930, the Hourly Electric Grid Monitor \cite{eia930}, downloaded as six-month bulk files. Two tables are used: the balance table (hourly demand, net generation and generation by energy source for each balancing authority) and the subregion table (hourly demand for zones within the larger authorities). The sample runs from 2019-01-01 to 2026-11-24. Ten balancing authorities are kept: PJM, ERCOT, MISO, SPP, NYISO, ISO-NE, CAISO, Southern Company, TVA and Duke Energy Carolinas. EIA's anomaly-adjusted columns are used where they exist.
 
 \subsection{Cleaning}
 The feed contains occasional reporting errors, including zeros and values several orders of magnitude too large. Hourly demand is cleaned in three steps. Values at or below zero are removed. Values more than 2.5 times, or less than 0.4 times, the median of the surrounding week (a centered 169-hour window) are removed. Gaps of up to six hours are filled by linear interpolation. A month is used only if at least 90\% of its hours are present. In PJM zones the filter removes well under 0.01\% of hours, except in the small Rockland zone, which is dropped for incomplete coverage. That leaves 19 zones.
@@ -281,8 +281,8 @@ MISO (Midwest) & 0.679 & 0.628 & [0.623, 0.633] & $<$0.001 & 0.461 \\
 SPP (Central) & 0.596 & 0.575 & [0.569, 0.581] & $<$0.001 & 0.415 \\
 NYISO (New York) & 0.330 & 0.323 & [0.319, 0.326] & 0.006 & 0.233 \\
 ISO-NE (New England) & 0.358 & 0.303 & [0.298, 0.307] & $<$0.001 & 0.260 \\
-CAISO (California) & 0.235 & 0.149 & [0.143, 0.156] & $<$0.001 & 0.188 \\
-Southern Company & 0.506 & 0.507 & [0.502, 0.513] & 0.639 & 0.398 \\
+CAISO (California) & 0.235 & 0.149 & [0.142, 0.156] & $<$0.001 & 0.188 \\
+Southern Company & 0.506 & 0.507 & [0.502, 0.513] & 0.643 & 0.398 \\
 Tennessee Valley Authority & 0.287 & 0.222 & [0.216, 0.227] & $<$0.001 & 0.329 \\
 Duke Energy Carolinas & 0.411 & 0.391 & [0.385, 0.398] & $<$0.001 & 0.301 \\
 \bottomrule

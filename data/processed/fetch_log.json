@@ -1,5 +1,5 @@
 {
-  "fetched_at_utc": "2026-11-22 10:52",
+  "fetched_at_utc": "2026-11-23 21:27",
   "source": "EIA Form EIA-930, Hourly Electric Grid Monitor bulk files",
   "files": [
     {
@@ -124,11 +124,11 @@
     },
     {
       "file": "EIA930_BALANCE_2026_Jul_Dec.csv",
-      "rows_kept": 34569
+      "rows_kept": 35049
     },
     {
       "file": "EIA930_SUBREGION_2026_Jul_Dec.csv",
-      "rows_kept": 68660
+      "rows_kept": 69620
     }
   ],
   "balance_headers": {
@@ -974,8 +974,8 @@
       "Region"
     ]
   },
-  "balance_rows": 691680,
-  "subregion_rows": 1382880,
+  "balance_rows": 692160,
+  "subregion_rows": 1383840,
   "balance_columns": [
     "ba",
     "utc",
@@ -1027,5 +1027,5 @@
     "RECO"
   ],
   "first_hour_utc": "2019-01-01 06:00:00",
-  "last_hour_utc": "2026-11-22 08:00:00"
+  "last_hour_utc": "2026-11-24 08:00:00"
 }
