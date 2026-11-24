@@ -164,3 +164,6 @@ table.plain tbody tr:hover{background:var(--panel)}
 .cards a>div:first-child{margin-bottom:30px}
 html.light body{background:#fff}
 html.light .pagehead{padding-top:30px}
+
+/* Phones: finger-sized controls */
+@media (max-width:760px){.nav .mark{display:inline-flex;align-items:center;min-height:44px}.nav .menu{min-height:44px}.controls button{min-height:44px}}
